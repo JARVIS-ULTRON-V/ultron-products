@@ -13,4 +13,4 @@ Public host for Gumroad product files. Each subfolder is one product's deliverab
 | Real Estate Lead Gen AI Prompt Pack | real-estate/real-estate-lead-gen-ai-prompt-pack.md |
 | Cold Email Swipe File | cold-email/cold-email-swipe-file.md |
 | Freelancer Finance Tracker | freelancer-finance/Freelancer Finance Tracker.xlsx |
-| Small Business Finance Kit | small-business/small-business-finance-kit.xlsx |
+| Small Business Finance Kit | small-business/Small Business Finance Kit.xlsx |
