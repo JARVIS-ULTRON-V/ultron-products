@@ -514,7 +514,7 @@ Each matrix cell must also record: primary text (final copy), headline, descript
 | Content inventory | Every copy block and asset, with source (which artifact it comes from) |
 | Interaction | Behaviour and state changes |
 | Accessibility | Contrast note, alt text, keyboard behaviour, heading level |
-| Copy source | Which prompt/artifact produced this copy (e.g. Prompt 44 → landing page headline set) |
+| Copy source | Which prompt/artifact produced this copy (e.g. Prompt 13 → landing page headline set) |
 
 **Fixed rules for this artifact**
 - Every section states its purpose in one line. Sections without a purpose get cut.
@@ -1176,7 +1176,7 @@ RULES:
 - Write the elevator pitches in the brand voice; they are spoken out loud.
 
 HOW TO USE:
-This output feeds landing page copy (Prompt 44), ad copy (Prompt 23), the strategy one-pager (Template 7), and proposal covers. Run it once, store it, and treat it as the source of truth — every later piece of client-facing copy should trace back to the hierarchy in this document.
+This output feeds landing page copy (Prompt 13), ad copy (Prompt 25), the strategy one-pager (Template 7), and proposal covers. Run it once, store it, and treat it as the source of truth — every later piece of client-facing copy should trace back to the hierarchy in this document.
 ```
 
 ### 07 — Competitive Landscape Scan for a Pitch
@@ -1285,7 +1285,7 @@ RULES:
 - If the outline would require more than {{word_count}} words, compress the outline rather than truncating sentences.
 
 HOW TO USE:
-Generate, then run Prompt 57 (Editorial QA Pass) over the draft before it goes to the client. Treat the "Editor's notes" section as your list of client questions — it converts a vague "can you review this?" into a specific list of three things to check.
+Generate, then run Prompt 57 (Pre-Send Client Deliverable QA) over the draft before it goes to the client. Treat the "Editor's notes" section as your list of client questions — it converts a vague "can you review this?" into a specific list of three things to check.
 ```
 
 ### 10 — Blog Post Series From One Pillar Topic
@@ -1395,7 +1395,7 @@ RULES:
 - Never compare to a named competitor. Comparative claims without substantiation are a legal risk.
 
 HOW TO USE:
-Pair this with Prompt 55 (Image Prompt Set for Product Photography) and you can ship a product page from a single spreadsheet of specs. Run Prompt 58 (Legal & Claims Check) before publishing anything with a performance or health claim.
+Pair this with Prompt 23 (Image and Graphic Prompt Set) and you can ship a product page from a single spreadsheet of specs. Run Prompt 57 (Fact and Claim Check) before publishing anything with a performance or health claim.
 ```
 
 ### 13 — Landing Page Headline and Hero Copy Set
@@ -2087,154 +2087,1890 @@ HOW TO USE:
 Send this with the projected impact table highlighted, and expect the conservative scenario to be the one the client reads. Make the conservative scenario genuinely conservative — a projection that only works if everything goes right won't survive their CFO.
 ```
 
-ADD = """
-
 ---
+
 
 ## SEO
 
-### SEO keyword map builder
-```
-You are an SEO strategist for a service business. For the client {{client_name}} in {{industry}}, build a 3-tier keyword map in a markdown table:
-| Search intent | Target keyword | Monthly search estimate | Difficulty (low/med/high) | Suggested page |
+### 31 — Keyword Research Map With Page Assignments
 
-Tier 1: head terms (high volume, generic). Tier 2: mid-tail commercial terms. Tier 3: long-tail, high-intent terms.
-Include 4 rows per tier (12 total). For each row, add one line on why that page should target it.
-```
-**How to use:** Feed the client's service list and locale. **What good looks like:** 12 realistic, intent-sorted keywords with a page assigned to each.
+```text
+ROLE:
+You are an SEO strategist producing a keyword research map that connects search demand to specific pages — not a flat keyword list with volumes.
 
-### Technical SEO audit summary
+INPUTS:
+- Client: {{client_name}}
+- Site: {{website_url}}
+- Offer: {{offer}}
+- Audience: {{audience}}
+- Current keyword performance and ranking URLs: {{current_rankings}}
+- Competitors: {{competitors}}
+- Brand voice guide: {{brand_voice_guide}}
+- Data source and date for volumes: {{data_source}}
+
+OUTPUT FORMAT — produce four tables:
+
+TABLE 1 — DEMAND CLUSTERS
+Columns: Cluster | Primary intent | Monthly volume | Avg. difficulty | Relevance (1–5) | Priority (A/B/C). 8–12 rows.
+
+TABLE 2 — KEYWORD TO PAGE MAP
+Columns: Keyword | Cluster | Intent | Volume | Difficulty | Current ranking URL | Target URL | Action (new page / update / consolidate / leave). 30–45 rows. Every row has a target URL — write [PROPOSED NEW: /path-slug] if it doesn't exist.
+
+TABLE 3 — CONTENT GAPS
+Columns: Missing topic | Keywords in cluster | Why it's missing | Recommended page | New or expand | Priority | Est. monthly value. 10–15 rows.
+
+TABLE 4 — CANNIBALISATION CHECK
+Columns: Intent | URL A | URL B | Conflict type | Fix recommendation. Include every overlapping intent you can identify, minimum 3 rows.
+
+RULES:
+- Assign intent before priority. Intent determines the page type: informational → guide or article, commercial → comparison or category page, transactional → product or service page, navigational → homepage or existing brand page.
+- Every keyword maps to a URL. A list without destinations is not a map.
+- Report volumes with the tool and date from {{data_source}}. If a figure is estimated, label it.
+- The cannibalisation check must propose a specific fix per conflict: consolidate, differentiate by intent, or canonicalise.
+- Do not recommend a new page where an existing page can be rewritten and will rank faster — state which is cheaper.
+- Apply {{brand_voice_guide}} to any recommended title tags or H1s.
+
+HOW TO USE:
+This becomes the roadmap in Template 3 (SEO Audit Report) section 11. Print Table 2 and mark the Action column in three colours: rewrite, new, consolidate — it's the fastest way to get a client to agree to a content plan.
 ```
-List the top {{n}} technical SEO issues for {{client_name}}'s site likely to affect Core Web Vitals and crawlability:
-1. Site speed (LCP/INP/CLS) - what to fix
-2. Mobile rendering issues
-3. Broken links / 404s
-4. Duplicate content / canonical issues
-5. Internal linking gaps
-6. Structured data opportunities
-For each: symptom, likely cause, fix, and priority (P0/P1/P2). Output as a table, then a 5-line executive summary.
+
+### 32 — Technical SEO Audit Report
+
+```text
+ROLE:
+You are a technical SEO specialist producing an audit report a developer can act on without a second conversation.
+
+INPUTS:
+- Client: {{client_name}}
+- Website: {{website_url}}
+- Crawl data: {{crawl_data}}
+- Core Web Vitals / performance data: {{performance_data}}
+- Index coverage and search console data: {{index_data}}
+- Backlink data: {{backlink_data}}
+- Client's current developer or agency: {{dev_contact}}
+- Brand voice guide: {{brand_voice_guide}}
+
+OUTPUT FORMAT — produce:
+
+1. EXECUTIVE SUMMARY (150 words): traffic trend, the three issues costing the most, the single biggest structural risk, and the 30-day quick-win list.
+2. SITE HEALTH SNAPSHOT (table): Metric | Current | Benchmark | Status. 10 rows covering sessions, indexed pages, clicks, impressions, average position, pages with errors, CWV pass rate, mobile usability, crawl errors, and HTTPS coverage.
+3. TECHNICAL FINDINGS TABLE — Columns: ID | Issue | Severity (High/Medium/Low) | Pages affected | Evidence | Recommended fix | Owner | Effort (S/M/L) | Impact score | Priority. 12–18 rows, ranked by impact.
+4. ON-PAGE FINDINGS TABLE — Columns: URL | Title tag | Meta description | H1 | Word count | Internal links | Status | Action. 10–15 rows.
+5. STRUCTURED DATA TABLE — Columns: Schema type | Pages | Status | Errors | Opportunity. 6 rows.
+6. BACKLINK PROFILE — table: Metric | Value | Change | Note. 8 rows, plus a top-5 referring domain table: Domain | DA/DR | Links | First seen | Context.
+7. PRIORITISED ROADMAP (table): Phase | Timeframe | Actions | Owner | Expected impact | Dependency. 3 rows (0–30 days, 30–90 days, 90+ days).
+8. MEASUREMENT PLAN (table): KPI | Tool | Baseline | Target | Checkpoint date | Who checks. 6 rows.
+
+RULES:
+- Severity definitions must be stated: High = blocks indexing or breaks the page; Medium = suppresses ranking or conversion; Low = improves hygiene.
+- Every finding names an owner and an effort estimate. Findings without owners don't get fixed.
+- Evidence is quoted — actual titles, actual error messages, actual URLs. Not "some pages".
+- Never recommend a change that would hurt a page currently ranking well without saying so explicitly.
+- Use {{brand_voice_guide}} for the summary and recommendations written for the client team.
+
+HOW TO USE:
+Deliver the summary and roadmap to the client, and the findings table to the developer as a separate attachment. Splitting them means the client reads strategy and the developer reads tasks — merging them usually means neither reads.
 ```
-**How to use:** Pair with a crawl tool (or the client's data). **What good looks like:** Prioritized, actionable fixes, not a vague "speed it up."
+
+### 33 — Page-Level SEO Rewrite
+
+```text
+ROLE:
+You are an on-page SEO specialist rewriting one page's search-facing elements, with the body copy edited only where it blocks relevance or readability.
+
+INPUTS:
+- Client: {{client_name}}
+- URL: {{target_url}}
+- Target keyword and secondary keywords: {{target_keyword}}, {{secondary_keywords}}
+- Search intent: {{search_intent}}
+- Current page content: {{current_page_content}}
+- Current rankings and impressions for this URL: {{url_performance}}
+- Brand voice guide: {{brand_voice_guide}}
+- Site architecture and internal link targets: {{internal_link_options}}
+
+OUTPUT FORMAT — produce:
+
+1. TITLE TAG OPTIONS — 3 options, each ≤ 60 characters with the character count shown, plus a one-line note on the angle.
+2. META DESCRIPTION — 2 options, 140–155 characters each, with counts. One benefit-led, one urgency/curiosity-led.
+3. URL SLUG RECOMMENDATION — recommended slug, whether to change, and the redirect note if changing.
+4. H1 — final text, with a note on keyword placement and whether an H2 currently competes with it.
+5. H2/H3 STRUCTURE — a table: Heading level | Final text | What the section covers | Keyword focus. Minimum 4 rows, maximum 8.
+6. BODY COPY EDITS — table: Section | Current issue | Revised copy (final) | Why. 4–8 rows, only where there's a real problem. If the body is strong, write "No change required — [reason]" and move on.
+7. INTERNAL LINK PLAN — table: From this page → to | Anchor text | Suggested placement. And: From another page → to this page | Anchor text | Source page.
+8. TECHNICAL NOTES (table): Issue | Recommendation | Owner — 4 rows: image alt text, schema, page speed, internal linking.
+9. SCHEMA BLOCK — the exact JSON-LD for the recommended schema type, ready to paste.
+10. MEASUREMENT PLAN (table): Metric | Baseline | Target | Review date.
+
+RULES:
+- The rewrite serves the search intent first and the brand second — but never at the cost of the brand voice. Apply {{brand_voice_guide}} to every sentence you rewrite.
+- Do not keyword-stuff. If the page reads worse, the rewrite failed.
+- Never remove a section that ranks — only add, reorder, or edit. If you propose removal, flag it with the ranking data.
+- Title and meta must match what the page actually delivers. No bait-and-switch titles.
+- Every body edit is a full replacement paragraph, not a comment.
+
+HOW TO USE:
+Deliver the title and meta options for a quick client pick, then the full rewrite. Have the client's SEO lead confirm the target keyword before you write — a beautiful rewrite for the wrong keyword is expensive.
+```
+
+### 34 — Content Gap Brief for a Content Cluster
+
+```text
+ROLE:
+You are an SEO content strategist producing a cluster brief: one pillar page plus the supporting articles that make it rank, with each article's brief complete.
+
+INPUTS:
+- Client: {{client_name}}
+- Pillar topic: {{pillar_topic}}
+- Target keyword and cluster keywords: {{target_keyword}}, {{cluster_keywords}}
+- Audience: {{audience}}
+- Brand voice guide: {{brand_voice_guide}}
+- Existing pages to avoid duplicating: {{existing_pages}}
+- Proof points and offers: {{proof_points}}, {{offer}}
+- Business goal this cluster should serve: {{goals}}
+
+OUTPUT FORMAT — produce:
+
+1. CLUSTER STRATEGY (120 words): why this cluster, what it will own in the SERP, and how the articles differ from each other in angle.
+2. CLUSTER MAP TABLE — Columns: Article | Type | Target keyword | Intent | Angle (unique) | Word count | Publish order | Links to. 8 rows: 1 pillar + 7 supporting.
+3. PILLAR BRIEF — full brief: H1, meta description, 8–12 H2s with one-line content descriptions, key entities to cover, 3 internal links out, 3 internal links in, word count, and the conversion goal.
+4. SUPPORTING ARTICLE BRIEFS — one brief per article (7), each with: H1, meta description, search intent, the specific question it answers, 4–6 H2s with content notes, unique proof or data point, target word count, internal link direction, and the CTA.
+5. TOPICAL COVERAGE TABLE — Columns: Subtopic | Covered by which article | Coverage depth (deep/standard/mention only). 14 rows, showing every subtopic mapped exactly once, with the pillar providing the overview.
+6. CONTENT PRODUCTION ORDER (table): Publish week | Article | Dependencies | Owner | Effort. 8 rows.
+7. INTERNAL LINKING MAP (table): From | To | Anchor text | Placement — 16 rows.
+8. RISK NOTES (3 bullets): cannibalisation risks, thin-content risks, and anything the client must verify.
+
+RULES:
+- Every supporting article has a unique angle. If two articles answer the same query, merge them and add a new one.
+- Coverage table must be exhaustive and non-overlapping: each subtopic is owned by exactly one article.
+- Apply {{brand_voice_guide}} to every headline, meta description, and H2.
+- Do not plan a cluster where the client can't produce the proof. If there are no case studies or data, flag it as a risk and recommend an alternative content type.
+- Every brief must specify word count and effort so the client can budget it.
+
+HOW TO USE:
+Send the cluster map table first — the client approves the map before any article is briefed in detail. It turns an argument about "how many articles" into a review of eight clearly differentiated angles.
+```
+
+### 35 — Local SEO and Google Business Profile Optimisation
+
+```text
+ROLE:
+You are a local SEO specialist producing a profile and local landing page plan for a business with physical locations or service areas.
+
+INPUTS:
+- Client: {{client_name}}
+- Locations: {{locations}}
+- Service areas: {{service_areas}}
+- Main services and priority keywords per location: {{services}}
+- GBP data: {{gbp_data}}
+- Reviews: {{reviews}}
+- Brand voice guide: {{brand_voice_guide}}
+- Local competitors: {{local_competitors}}
+
+OUTPUT FORMAT — produce:
+
+1. PROFILE OPTIMISATION TABLE — Columns: Profile | Business name | Category (primary + secondary) | Services (10) | Products (5) | Description (750 chars, final) | Posts (4, with topics and dates) | Photo plan (types + counts). One row per location.
+2. SERVICE LIST — table: Service | Description (150 chars, final) | Target keyword | Price indicator policy. 10 rows.
+3. LOCATION PAGES PLAN — table: URL | Location | Primary keyword | Title tag | H1 | Meta description | Local proof to include | Word count. One row per location page.
+4. REVIEW RESPONSE TEMPLATES — table: Review type | Response (final, 40–70 words) | 5 examples. 4 rows, covering 5-star praise, a service complaint, a complaint about communication, a wrong-detail review, and a review mentioning a competitor.
+5. NAP CONSISTENCY AUDIT (table): Location | Name | Address | Phone | Website | Issue | Fix — one row per location plus any directory inconsistencies found.
+6. CITATION OPPORTUNITY TABLE — Columns: Directory | Category | Priority | Action | Owner. 12 rows.
+7. LOCAL CONTENT IDEAS (table): Idea | Target keyword | Type | Effort | Local proof needed. 8 rows.
+8. MEASUREMENT PLAN (table): KPI | Tool | Baseline | Target | Cadence — 6 rows including calls, direction requests, GBP views, and review velocity.
+
+RULES:
+- The business description and services must be written in {{brand_voice_guide}}, and must read naturally, not keyword-stuffed.
+- Never invent attributes, hours, or services. If a location's hours are unknown, write [NEEDS INPUT: hours for {{location}}].
+- Review responses must acknowledge the specific experience without arguing; one reply per review, no templates visible to the reviewer as templates.
+- Local pages must contain genuine local proof — a real address, a real project, a real team name. No "we serve all areas" filler pages.
+
+HOW TO USE:
+Do the profile optimisation first — most local visibility problems are profile problems, and the profile work is a few hours. The review response templates then become a monthly task your community manager can complete without asking you.
+```
+
+### 36 — Schema and Structured Data Implementation
+
+```text
+ROLE:
+You are a technical SEO specialist producing an implementation-ready structured data plan with valid markup for the client's pages.
+
+INPUTS:
+- Client: {{client_name}}
+- Site and page types: {{website_url}}, {{page_types}}
+- Business details: NAP, services, products, pricing, FAQs: {{business_details}}
+- Existing markup found on site: {{existing_schema}}
+- Brand voice guide: {{brand_voice_guide}}
+- Third-party integrations in use (reviews, bookings, ecommerce): {{integrations}}
+
+OUTPUT FORMAT — produce:
+
+1. SCHEMA RECOMMENDATION TABLE — Columns: Page type | Schema type | Priority | Why it qualifies | Implementation effort. One row per page type, 6–10 rows.
+2. VALID JSON-LD BLOCKS — one complete, copy-paste-ready JSON-LD block per recommended schema type (minimum 4 blocks): Organization / LocalBusiness, WebSite with SearchAction, BreadcrumbList, Article, FAQPage, Product or Service, Review / AggregateRating. Use only properties supported by schema.org. Include placeholders only where a value genuinely depends on client data, and mark them {{...}}.
+3. FIELD REQUIREMENTS TABLE — Columns: Property | Where the value comes from | Who provides it | Example value. One row per property per schema type.
+4. VALIDATION CHECKLIST (table): Test | Tool | Pass condition | Result. 8 rows including Rich Results Test, Schema Markup Validator, and a live page inspection.
+5. IMPLEMENTATION NOTES (bullets): 6 items covering placement, validation, common implementation errors, and where errors appear in Search Console.
+6. IMPACT MONITORING PLAN (table): Metric | Baseline | Target | Checkpoint | Tool. 5 rows.
+7. COPY REQUIREMENTS — table: What the schema exposes to users | Required wording | Source of truth. 6 rows, showing which visible text must match the markup.
+
+RULES:
+- Only emit schema types the client's page genuinely qualifies for. FAQPage is not for every page; a page without visible FAQ content does not qualify.
+- Every property in a JSON-LD block must be visible on the page or come from a documented source. No invented aggregateRating, no fake reviews.
+- Use absolute URLs, and make sure @id references are consistent.
+- Mark any client-specific value as a {{placeholder}} with a note on where it lives, so implementation does not stall.
+- Never use Review or AggregateRating markup without the reviews being displayed on the page.
+
+HOW TO USE:
+Paste each JSON-LD block straight into the page template and test with the Rich Results Test before shipping. The "copy requirements" table is what prevents the most common failure — markup that says one thing and the page says another.
+```
+
+### 37 — SEO Competitor Gap Analysis
+
+```text
+ROLE:
+You are an SEO strategist producing a gap analysis against competitors, focused on the pages and topics where the client is losing ground.
+
+INPUTS:
+- Client: {{client_name}}
+- Client's site and performance: {{website_url}}, {{client_performance}}
+- Competitors and their sites: {{competitors}}
+- Shared keyword set: {{shared_keywords}}
+- Brand voice guide: {{brand_voice_guide}}
+- Industry or publication context: {{industry}}
+
+OUTPUT FORMAT — produce:
+
+1. COMPETITIVE LANDSCAPE TABLE — Columns: Competitor | Traffic estimate | Keywords ranking | Top content type | Pages with most links | Weakness we can exploit. 4–5 competitors.
+2. KEYWORD GAP TABLE — Columns: Keyword | Client position | Competitor A position | Competitor B position | Search intent | Competitor's winning format | Our move. 20–25 rows, only keywords where at least one competitor ranks on page 1 and the client does not.
+3. CONTENT GAP TABLE — Columns: Topic | Competitors covering it | Client coverage | Content type they used | Traffic potential | Recommended action. 10–12 rows.
+4. FORMAT GAP TABLE — Columns: Format (guide, tool, calculator, comparison, template, video) | Who uses it best | Client has it? | Effort to build | Expected impact. 8 rows.
+5. LINK GAP TABLE — Columns: Referencing domain | Links to client? | Links to competitor? | Relevance | Outreach angle. 12 rows.
+6. SERP FEATURE TABLE — Columns: SERP feature | Trigger | Client eligible? | How to win it. 8 rows.
+7. PRIORITY ACTIONS (table): Action | Why | Effort | Impact | Owner | First step. 10 rows.
+8. WHAT TO LEAVE ALONE (3 bullets): competitor strengths we should not chase.
+
+RULES:
+- Position and traffic figures carry a source and date. If you only have estimates, say "estimated".
+- For every gap, identify the competitor's winning format — the format, not just the topic, is usually the lesson.
+- The priority actions table must be executable by the client's team, not just by an SEO agency.
+- Apply {{brand_voice_guide}} to any titles or briefs included in the recommendations.
+- Do not recommend matching a competitor's weak page — point out where they are weak and label it as an opportunity.
+
+HOW TO USE:
+Use the content gap table to start the cluster brief (Prompt 34) and the link gap table to start outreach. The "what to leave alone" section is worth sending to the client explicitly — it shows judgement, and it stops you from spending a quarter chasing a competitor's irrelevant strength.
+```
+
+---
+
 
 ## Reporting & Analytics
 
-### Monthly performance report
-```
-Build a client-ready monthly report for {{client_name}} covering {{period}}. Use exactly these sections:
-1. Executive summary (3 sentences: headline result, what worked, what to do next)
-2. KPI table: metric | goal | actual | % of goal | trend vs last month
-3. Channel breakdown table: channel | spend | results | ROAS/CPL | notes
-4. Wins (3 bullets) and risks (3 bullets)
-5. Next month's plan (3 bullets with owners and dates)
+### 38 — Monthly Performance Report
 
-Write in a confident, consultative tone. End with a recommendation in one line.
-```
-**How to use:** Give it the real numbers; never let the AI invent metrics. **What good looks like:** A report you'd send to the client with only light edits.
+```text
+ROLE:
+You are an account director producing the monthly performance report for {{client_name}}. The executive summary must survive being forwarded to the client's leadership without edits.
 
-### Client QBR (quarterly business review) deck outline
+INPUTS:
+- Client: {{client_name}}
+- Reporting period: {{period}}
+- KPI targets: {{kpis}}
+- Raw performance data: {{metrics_data}}
+- Creative and content shipped this period: {{production_log}}
+- Known context: account changes, launches, tracking issues, external events: {{context}}
+- Brand voice guide: {{brand_voice_guide}}
+- Next month's planned activity: {{next_month_plan}}
+
+OUTPUT FORMAT — produce exactly these ten sections:
+
+1. HEADER — table: Client | Period | Prepared by | Date sent | Data sources | Reporting cadence.
+2. EXECUTIVE SUMMARY — 150 words maximum, four paragraphs: the month's headline result; the best-performing element and why; the biggest miss and what caused it; what changes next month. Written so it can be forwarded as-is.
+3. KPI SCORECARD — table: KPI | Target | Actual | vs target | vs last month | Trend | Status (On track / At risk / Off track). One row per KPI, minimum 4.
+4. CHANNEL PERFORMANCE — table: Channel | Spend | Impressions | Reach | Clicks | CTR | Conversions | CPA | ROAS | Efficiency rating (A/B/C/D). One row per channel.
+5. TOP PERFORMING ASSETS — table: Asset | Channel | Spend | Conversions | CPA | Why it worked (one line). 3 rows, each with a one-sentence interpretation.
+6. UNDERPERFORMERS & LOSSES — table: Asset or campaign | Spend | Result | Likely cause | Decision (pause / iterate / kill) | Owner. 3 rows. Every row has a decision.
+7. CREATIVE PRODUCTION LOG — table: Date | Asset | Channel | Status | Performance. Every item shipped this month.
+8. INSIGHTS — 4 bullets. Each bullet states a pattern and the numbers that prove it.
+9. NEXT MONTH'S PLAN — table: Action | Channel | Owner | Start date | Target metric. 6 rows.
+10. ACTION REQUIRED FROM CLIENT — table: # | Action | Why it matters | Decision owner | Needed by | Impact if delayed. 3–5 rows.
+
+RULES:
+- Every number comes from {{metrics_data}} exactly. Never estimate, never infer a number that wasn't provided. If a metric is unavailable, write "Not available — [reason]".
+- Every figure carries its comparison: target, prior period, or both.
+- Section 2 must not contain channel jargon. It states outcomes and what changes.
+- If a KPI missed target, section 6 must contain a corresponding entry with a decision.
+- Apply {{brand_voice_guide}} to all narrative sections. Numbers and table cells stay exact.
+- If the period contained a tracking outage, say so in the header and in section 2 before any conclusions.
+
+HOW TO USE:
+Build it in this order: scorecard, then channels, then narrative. Narrative written last reads like an analysis rather than a summary. Send the executive summary and the action-required table first in the email body — those are the two things that get read.
 ```
-Create a 12-slide deck outline for {{client_name}}'s quarterly review covering {{quarter}}:
-Slide 1: Title + period, Slide 2: Snapshot (revenue, leads, spend, ROAS), Slide 3: vs last quarter table,
-Slide 4: What worked, Slide 5: What didn't, Slide 6: Channel deep-dive, Slide 7: Top 3 wins,
-Slide 8: Risks & issues, Slide 9: Next-quarter plan, Slide 10: Budget proposal, Slide 11: Strategic recommendation,
-Slide 12: Q&A / discussion points.
-For each slide give the headline, 3 bullet points, and any visual/chart suggestion.
+
+### 39 — Quarterly Business Review Deck Outline
+
+```text
+ROLE:
+You are an account director building the QBR outline for {{client_name}} — a deck structure where each slide title is the message, not the label.
+
+INPUTS:
+- Client: {{client_name}}
+- Quarter: {{period}}
+- KPI targets and results: {{kpis}}, {{results}}
+- Revenue, pipeline, or sales data if available: {{business_results}}
+- Creative and content shipped: {{production_log}}
+- Tests run and learnings: {{test_results}}
+- Competitive or market movement: {{market_context}}
+- Q3 priorities and budget: {{next_quarter_plan}}
+- Decisions needed from the client: {{decisions_required}}
+- Brand voice guide: {{brand_voice_guide}}
+
+OUTPUT FORMAT — produce a 14-slide outline. For each slide:
+
+- SLIDE NUMBER and HEADLINE MESSAGE: a full sentence, written as it appears on the slide ("Paid social contributed 61% of pipeline, up from 44%") — never a label like "Results".
+- CONTENT BLOCKS: what appears, item by item.
+- VISUAL: the chart, table, or image, with the data points it must show.
+- SPEAKER NOTE: 40–80 words of what to say, including the transition to the next slide.
+- DATA SOURCE: which input the numbers come from.
+
+Slide sequence:
+1. Title and framing. 2. The three things to know (or skip this slide for a 20-minute version). 3. Business outcomes. 4. Acquisition efficiency. 5. Pipeline or lead contribution by channel. 6. Organic and search performance. 7. Creative performance — top three. 8. Creative performance — what failed. 9. Testing and learnings. 10. Where we lost money. 11. Market and competitive movement. 12. Q3 strategy and priorities. 13. Q3 roadmap and budget. 14. Decisions we need from you.
+
+Then produce:
+- DECISION REQUEST TABLE — Columns: # | Decision | Options | Our recommendation | Needed by | Consequence of no decision. One row per item in {{decisions_required}}.
+- APPENDIX INDEX — table: Slide reference | Content | Used for questions. 6 rows.
+- Q&A PREP — 6 likely client questions with prepared answers, each 40 words.
+
+RULES:
+- Every headline must be a takeaway supported by a number from the inputs. If there isn't a number, the slide title states the point qualitatively — and the content supports it.
+- No invented revenue attribution. If pipeline contribution isn't tracked, say "not tracked" and explain what you'd need to track it.
+- Slide 8 (failures) and slide 10 (money lost) are mandatory. A QBR without them reads as a sales pitch and loses trust.
+- Apply {{brand_voice_guide}} to headlines and speaker notes.
+- 14 slides maximum. Extra content goes in the appendix.
+
+HOW TO USE:
+Fill the outline into your deck template, then rehearse from the speaker notes only. If you can't deliver slide 14's decisions in three minutes, the deck is too long — cut slides 2, 6, and 9 for the executive version.
 ```
-**How to use:** Use as the skeleton for the actual deck. **What good looks like:** A complete, structured QBR the account lead can build from.
+
+### 40 — Campaign Performance Deep-Dive
+
+```text
+ROLE:
+You are a performance analyst producing a deep-dive on one campaign — the document you bring to a media planning session.
+
+INPUTS:
+- Campaign name and platform: {{campaign_name}}, {{platform}}
+- Period: {{period}}
+- Full performance data: {{campaign_data}}
+- Creative assets involved: {{creative_assets}}
+- Audience and targeting setup: {{audience_setup}}
+- Funnel and conversion path: {{conversion_path}}
+- Brand voice guide: {{brand_voice_guide}}
+
+OUTPUT FORMAT — produce:
+
+1. VERDICT (80 words): whether the campaign met its objective, in one paragraph, with the number that decides it.
+2. FUNNEL TABLE — Columns: Funnel stage | Volume | Rate from previous stage | Benchmark rate | Gap | Diagnosis. 5 rows (impressions → clicks → landing page views → leads → qualified/conversions).
+3. CREATIVE PERFORMANCE TABLE — Columns: Asset ID | Hook | Format | Spend | CTR | CVR | CPA | Frequency | Status (scale / iterate / kill). One row per asset, minimum 6.
+4. FREQUENCY & SATURATION TABLE — Columns: Audience segment | Spend | Reach | Frequency | CPM trend | Saturation read. 6 rows.
+5. PLACEMENT / AUDIENCE BREAKDOWN — table: Segment | Spend | CPA | Volume | Read. 8 rows, mixing placements, devices, and audiences with a read for each.
+6. WHAT WORKED AND WHY (3 subsections, each 80 words): the pattern, the evidence, and the mechanism behind it.
+7. WHAT DIDN'T WORK AND WHY (3 subsections, each 80 words): same structure, including at least one thing the client's team assumed would work.
+8. LANDING PAGE FRICTION CHECK — table: Element | Observed | Benchmark | Impact estimate | Fix. 6 rows.
+9. TEST PLAN — table: Test | Hypothesis | Variable | Budget | Metric | Decision threshold | Decision date. 5 rows.
+10. RECOMMENDATIONS — table: Recommendation | Expected effect | Effort | Risk | Owner. 6 rows, ranked.
+
+RULES:
+- Diagnose from the data provided. If a plausible cause isn't supported by the data, present it as a hypothesis with the test that would confirm it — never as a finding.
+- Every rate comparison includes a benchmark. A rate without a benchmark is just a number.
+- Distinguish correlation from cause explicitly at least once.
+- Apply {{brand_voice_guide}} to sections 6 and 7 so the analysis sounds like your agency, not a textbook.
+- Recommendations must be specific enough to action this week.
+
+HOW TO USE:
+Send sections 3, 6, 7, and 10 to the client; keep the funnel, frequency, and landing page sections internal. This document is the raw material for the monthly report (Prompt 38) and the QBR (Prompt 39), so run it before writing either.
+```
+
+### 41 — Dashboard and Tracking Setup Specification
+
+```text
+ROLE:
+You are an analytics specialist producing a tracking implementation spec that a developer can build from and a client can sign off on.
+
+INPUTS:
+- Client: {{client_name}}
+- Site or app and tech stack: {{tech_stack}}
+- Business goals and conversions: {{goals}}, {{conversions}}
+- Existing analytics setup: {{current_tracking}}
+- Consent and privacy requirements: {{privacy_requirements}}
+- Platforms to connect: {{platforms_to_connect}}
+- Brand voice guide: {{brand_voice_guide}}
+
+OUTPUT FORMAT — produce:
+
+1. MEASUREMENT PLAN TABLE — Columns: Business goal | User action that signals it | Event name | Trigger definition | Properties | Where it fires | Priority. Minimum 6 rows.
+2. EVENT SPECIFICATION TABLE — Columns: Event name | Category | Trigger | Parameters | Parameter example | Deduplication rule | Consent requirement. Minimum 12 rows.
+3. IMPLEMENTATION TABLE — Columns: # | Implementation step | Platform | Type (tag / code / config) | Where in the codebase | Owner | Test method | Status. 10–14 rows.
+4. DATA FLOW MAP — a plain-language description of the journey from user action to the client's report: click → tag fires → platform receives → reporting tool stores → dashboard displays → report references. Name each step and the tool used.
+5. DASHBOARD SPECIFICATION — table: Dashboard | Audience | Widget | Metric | Timeframe | Filter | Owner. 12–16 rows across 3 dashboards (Executive, Channel, Creative).
+6. QA TEST PLAN — table: Test | Steps | Expected result | Status. 12 rows, including a real transaction test, a cross-domain check, and a consent rejection path.
+7. PRIVACY & COMPLIANCE NOTES — 6 bullets covering consent mode, PII handling in URLs and parameters, retention, and what must never be sent to ad platforms.
+8. MAINTENANCE PLAN — table: Task | Frequency | Owner | Trigger for out-of-cycle check. 6 rows.
+9. DOCUMENTATION HANDOFF — 5 bullets: what to document, where to store it, and who to contact when it breaks.
+
+RULES:
+- Every event has a trigger definition precise enough to test — "button with id 'submit-form' clicked" not "form submitted".
+- No PII in event parameters, URLs, or platform fields. Flag any input in {{current_tracking}} that does this.
+- Every metric in the dashboard spec must trace to an event in section 2. If a metric has no event, it doesn't exist yet — say so.
+- Apply {{brand_voice_guide}} to the written documentation sections so the client's team can read them without a translation layer.
+- Note explicitly where consent state affects firing, and what happens when consent is denied.
+
+HOW TO USE:
+Send this to the client for sign-off before the developer starts. Half of all tracking disputes are scope disagreements, not technical ones, and the sign-off email ends them. Book the first QA test for week 2, not launch day.
+```
+
+### 42 — Anomaly and Performance Alert Triage
+
+```text
+ROLE:
+You are an analyst triaging a performance anomaly in {{client_name}}'s account — deciding whether it is a real problem, a tracking artefact, or noise, and what happens now.
+
+INPUTS:
+- Metric and expected range: {{metric}}, {{expected_range}}
+- Actual values and dates: {{actual_data}}
+- Tracking changes, site updates, or tagging: {{recent_changes}}
+- Campaign or content activity in the window: {{campaign_activity}}
+- External events: holidays, outages, competitor activity: {{external_events}}
+- Brand voice guide: {{brand_voice_guide}}
+
+OUTPUT FORMAT — produce:
+
+1. TRIAGE VERDICT (100 words): one of — REAL PROBLEM / TRACKING ARTEFACT / EXPECTED VARIATION / INSUFFICIENT DATA — with the single strongest piece of evidence supporting it.
+2. EVIDENCE TABLE — Columns: Evidence | Supports | Contradicts | Weight (strong / medium / weak). Minimum 6 rows, with at least one contradicting row. If nothing contradicts, say why.
+3. DIAGNOSTIC TREE — a stepped decision path in plain text: "If X is true → check Y → if Y is true → …", 5–8 branches, each ending in a conclusion.
+4. WHAT WE LOST OR GAINED — table: Segment | Metric | Expected | Actual | Delta | $ or lead impact. 6 rows.
+5. IMPACT WINDOW — table: Date | Metric | Expected | Actual | Status. The full window, one row per day, minimum 7 rows, so the shape of the anomaly is visible.
+6. ACTION NOW — table: Action | Owner | Due | Impact if delayed. 4 rows, ordered by urgency.
+7. COMMUNICATION DRAFT — a 120-word note to the client: what happened, what we're doing, and what we need. Written in {{brand_voice_guide}}. Tone is calm and factual; no apology for things that aren't yet known.
+8. PREVENTION — 3 bullets: the monitoring change that would catch this next time.
+
+RULES:
+- Choose one verdict. If the evidence genuinely supports two, pick the one that is cheaper to be wrong about and say why in one line.
+- Never claim causation from timing alone. Correlation is evidence, not proof — unless there is a mechanism you can name.
+- If a tracking change coincides with the anomaly, state it plainly and treat tracking as the leading hypothesis until ruled out.
+- The client note does not include internal jargon, and does not promise a fix date you don't control.
+- Include the "insufficient data" option honestly when the sample is too small.
+
+HOW TO USE:
+Run this the same day the anomaly is spotted, before you reply to the client. Writing the triage first stops the two worst responses — guessing, and replying with a reassurance you can't support.
+```
+
+### 43 — Forecast and Projection Model
+
+```text
+ROLE:
+You are a performance analyst building a projection the client can plan against — with the assumptions visible and the range honest.
+
+INPUTS:
+- Client: {{client_name}}
+- Historical performance data (minimum 3 months): {{historical_data}}
+- Current budget and plan: {{budget}}, {{plan}}
+- Pipeline or sales data if available: {{sales_pipeline}}
+- Seasonality, launches, or known events: {{events}}
+- Assumptions we want to test: {{assumptions}}
+- Brand voice guide: {{brand_voice_guide}}
+
+OUTPUT FORMAT — produce:
+
+1. FORECAST SUMMARY (120 words): the range, the central estimate, and the single biggest factor that could move it. Written for a business owner, not an analyst.
+2. ASSUMPTIONS TABLE — Columns: Assumption | Base case | Conservative | Stretch | Basis | Confidence (H/M/L). 8–12 rows, covering volume, conversion rate, spend, AOV, seasonality, and any assumption in {{assumptions}}.
+3. PROJECTION TABLE — Columns: Month | Spend | Sessions or impressions | Conversions | CPA | Revenue or value | vs target. 6 rows (3 historical + 3 projected), with historical rows marked Actual and projected rows marked Forecast.
+4. SCENARIO TABLE — Columns: Scenario | Key assumption changes | Conversions | CPA | Value | Net vs plan. 3 rows.
+5. SENSITIVITY TABLE — Columns: Variable changed | By | Effect on conversions | Effect on value. 8 rows, showing which variables actually matter.
+6. BREAK-EVEN TABLE — Columns: Metric | Break-even value | Current | Gap | Action to close. 5 rows.
+7. MONITORING CHECKPOINTS — table: Date | Metric to check | Threshold | If below | If above. 4 checkpoints.
+8. WHAT WOULD MAKE US WRONG — 4 bullets: the conditions under which this forecast fails, stated before the client finds them.
+
+RULES:
+- Every projected number derives from a stated assumption. No number appears without one.
+- The conservative scenario must be genuinely conservative, not a mild adjustment.
+- The sensitivity table must identify at least one variable that barely matters — and say so, because clients spend effort on the wrong lever.
+- If the history is shorter than 3 months, state that the confidence is lower and widen the range.
+- Apply {{brand_voice_guide}} to the summary and the client-facing sections.
+
+HOW TO USE:
+Present the summary with the scenario table, not the full model. Clients engage with ranges and react to single numbers — if they press, walk them down into the assumptions table.
+```
+
+### 44 — Analytics Data QA and Validation
+
+```text
+ROLE:
+You are an analyst validating data before it goes into a client report. Your job is to find what's wrong with the numbers before the client does.
+
+INPUTS:
+- Data to validate: {{raw_data}}
+- Expected sources and platforms: {{data_sources}}
+- Known tracking issues: {{known_issues}}
+- Previous period data for comparison: {{previous_period}}
+- Stated targets: {{targets}}
+- Brand voice guide: {{brand_voice_guide}}
+
+OUTPUT FORMAT — produce:
+
+1. VALIDATION VERDICT — table: Dataset | Status (Pass / Pass with caveats / Fail) | Issue count | Blocking issue. One row per data source.
+2. ISSUE LOG — Columns: ID | Dataset | Issue | Severity (Critical / Major / Minor) | Evidence | Likely cause | Affected metrics | Fix | Owner. Minimum 10 rows.
+3. COMPLETENESS CHECK — table: Metric | Expected | Actual | Missing | Completeness % | Source. 12 rows.
+4. CONSISTENCY CHECK — table: Metric | Source A | Source B | Variance | Tolerance | Verdict. 8 rows comparing platform vs. analytics figures.
+5. OUTLIER CHECK — table: Date or segment | Metric | Value | Expected range | Deviation | Real or artefact | Action. 6 rows.
+6. PERIOD ALIGNMENT CHECK — table: Platform | Period used | Why it differs | Adjustment needed | Effect on comparison. 6 rows.
+7. CORRECTED DATA TABLE — the cleaned dataset with columns: Date | Metric | Cleaned value | Original value | Adjustment | Reason. Only rows that changed.
+8. VALIDATION NOTES FOR THE REPORT — 4 bullets: what the client should be told about data quality, in plain language, including anything that limits what we can claim.
+
+RULES:
+- Flag every variance over the stated tolerance, including small ones. Do not silently reconcile.
+- Never adjust a number without recording the original and the reason.
+- Date and timezone mismatches between platforms are the most common defect — check them first and always.
+- Bot traffic, internal traffic, and test transactions must be identified if visible in the data.
+- If the data cannot support the targets as stated, say so in section 8.
+
+HOW TO USE:
+Run this before assembling any client-facing report. It takes ten minutes and catches the one mistake that erodes a year's credibility. Keep the issue log in your internal tracker, not in the client report — unless the issue changes a conclusion.
+```
+
+---
+
 
 ## Proposals, Pricing & Scope
 
-### Scoped proposal draft
-```
-Draft a proposal for {{client_name}} for the project {{project}} at a target price of {{price}}.
-Sections: Executive summary, Problem we solve, Our approach (3 phases), Deliverables list, Timeline table,
-Investment & what's included, What's NOT included, Next steps.
-Keep it one page if possible. Use a confident but consultative tone. True 3 pricing options (economy / recommended / premium) as a table.
-```
-**How to use:** Fill in real scope and price. **What good looks like:** A proposal the client can say yes to without a rewrite.
+### 45 — Agency Proposal Deck Outline
 
-### Statement of work (SOW) builder
+```text
+ROLE:
+You are a new business director writing the proposal for {{client_name}}. The deck must be built on their problem, not on your capability.
+
+INPUTS:
+- Client: {{client_name}}
+- Industry: {{industry}}
+- What we know about their business: {{client_context}}
+- Their stated goals: {{goals}}
+- Their current situation and gaps: {{current_situation}}
+- The work we're proposing to do: {{scope}}
+- Our relevant proof: {{case_studies}}
+- Commercials: {{pricing}}
+- Brand voice guide: {{brand_voice_guide}}
+
+OUTPUT FORMAT — produce a 12-slide outline. For each slide:
+
+- SLIDE NUMBER
+- SLIDE TITLE as a full sentence stating the point ("Your content is producing traffic, but almost none of it converts") — never a label.
+- CONTENT: the exact bullets, figures, or table rows that appear on the slide, written out.
+- VISUAL: chart, table, diagram, or image, with the data it shows.
+- SPEAKER NOTE: 40–70 words.
+
+Slide sequence:
+1. Cover. 2. The situation we're seeing (their reality, in their words). 3. What it's costing them. 4. Why it happens — the three root causes. 5. What good looks like (the target state, measurable). 6. The strategy in one page. 7. The three workstreams. 8. What we deliver — the artefact list. 9. Timeline: first 90 days. 10. Investment and what's included. 11. How we work together (cadence, tools, what we need from you). 12. Next step.
+
+Then produce:
+- APPENDIX INDEX — table: Slide reference | Content | Purpose. 8 rows.
+- COMMERCIAL SUMMARY — table: Line | Amount | Frequency | Notes. 8 rows covering fee, media management, one-off costs, and exclusions.
+- CLIENT INPUTS NEEDED — table: What we need | From whom | By when | What it blocks. 6 rows.
+- OBJECTION PREP — 5 likely objections with 40-word answers.
+
+RULES:
+- Slides 2–4 must contain only things we know about the client. No generic market claims about "the industry".
+- Slide 5 must be measurable. "Better brand awareness" is not a target state.
+- Only use proof from {{case_studies}}; if a case study is only loosely comparable, say so in the speaker note rather than implying equivalence.
+- The timeline must respect the client's real constraints (festival season, product launch, team capacity) from {{client_context}}.
+- Apply {{brand_voice_guide}} to all client-facing copy.
+- No superlatives about your own agency. No "we are passionate about".
+
+HOW TO USE:
+Run this after the discovery call and before the pricing conversation, so the deck's shape tells you what the commercial conversation should be. If the client's problem is unclear, stop and go back to Prompt 01 — a proposal built on a fuzzy problem reads as generic no matter how good the deck is.
 ```
-Turn the project {{project}} for {{client_name}} into a precise SOW:
-1. Project overview, 2. Scope of work (numbered deliverables), 3. Out of scope,
-4. Timeline with milestones and dates, 5. Payment schedule, 6. Revisions allowed,
-7. Who does what (contact table), 8. Approval process.
-Use exact, non-ambiguous language. Flag anything that needs client confirmation.
+
+### 46 — Scope of Work Document
+
+```text
+ROLE:
+You are a producer writing the scope of work that sits underneath a signed proposal — the document that prevents scope creep and makes the relationship survivable.
+
+INPUTS:
+- Client: {{client_name}}
+- Engagement type: {{engagement_type}}
+- Agreed deliverables: {{deliverables}}
+- Frequency and volume commitments: {{commitments}}
+- Fee and payment terms: {{fee}}, {{payment_terms}}
+- What the client provides: {{client_provides}}
+- Exclusions: {{exclusions}}
+- Revisions and rounds included: {{revision_policy}}
+- Legal and compliance requirements: {{legal_requirements}}
+- Brand voice guide: {{brand_voice_guide}}
+
+OUTPUT FORMAT — produce:
+
+1. ENGAGEMENT SUMMARY (100 words): what we do, for whom, at what volume, for what fee.
+2. DELIVERABLES TABLE — Columns: # | Deliverable | Format | Quantity | Frequency | Due | Specification reference (which artifact template or prompt) | Included? . Minimum 10 rows. The specification reference column points at the exact artefact template in this pack.
+3. WORKFLOW & MILESTONES TABLE — Columns: Phase | Timing | Our tasks | Client tasks | Deliverable at end | Client approval deadline. 4–6 rows.
+4. ROLES & RESPONSIBILITIES — table: Role | Name | Accountable for | Approves | Response time. 8 rows. If a name is unknown, write the role and a [CLIENT: assign name] marker.
+5. INCLUSIONS AND EXCLUSIONS — two tables. Inclusions: Item | Detail. Exclusions: Item | Detail | What happens if it's requested (usually a cost note). At least 8 rows in each.
+6. CHANGE CONTROL TABLE — Columns: Change type | Examples | Approval needed | Cost impact | Timeline impact. 6 rows.
+7. REVISIONS POLICY (table): Artefact type | Included rounds | Definition of a round | Additional round cost. 6 rows.
+8. FEES AND PAYMENT TABLE — Columns: Line | Amount | Frequency | Due | Notes. 8 rows, including a third-party cost pass-through note and an overage rate.
+9. CLIENT RESPONSIBILITIES TABLE — Columns: Responsibility | Why it matters | What we do if it's late. 10 rows.
+10. TERMINATION AND NOTICE — 1 paragraph written in plain English, plus 3 bullets on notice periods, data handover, and what happens to in-flight work.
+11. ACCEPTANCE — a signature block table with Name, Role, Date, Signature lines for both parties.
+
+RULES:
+- Every deliverable names a quantity and a frequency. "Social media support" is not a deliverable; "12 feed posts per month, 4 per week" is.
+- Exclusions must be specific and include the obvious ones (paid media spend, printing, translation, stock photography, additional rounds, third-party licences, client-side legal review).
+- Nothing in this document should require a lawyer to read twice — but it must be precise enough to bind a scope.
+- Do not invent names, fees, or terms. If a value isn't given, write [TO CONFIRM] and flag it in a summary line at the top.
+- Apply {{brand_voice_guide}} to the plain-English sections; keep the contractual sections plain, not legalistic.
+
+HOW TO USE:
+Send this with the proposal, then use it as the checklist at every scoping conversation. Every request that isn't in the inclusions table becomes a change request — and this document is what makes that conversation non-adversarial.
 ```
-**How to use:** The deliverable is the contract annex. **What good looks like:** A SOW with no vague "etc." clauses.
+
+### 47 — Pricing and Packaging Options
+
+```text
+ROLE:
+You are a commercial strategist building pricing and packaging options for {{client_name}}, with the trade-offs of each option made explicit.
+
+INPUTS:
+- Client: {{client_name}}
+- What they need: {{scope}}
+- Estimated effort by workstream: {{effort_estimates}}
+- Current market rates for this type of engagement: {{market_rates}}
+- Their budget signal: {{budget_signal}}
+- Their business model and how revenue works: {{business_model}}
+- Recurring vs project nature of the work: {{engagement_type}}
+- Brand voice guide: {{brand_voice_guide}}
+
+OUTPUT FORMAT — produce:
+
+1. COST BUILD-UP TABLE — Columns: Workstream | Monthly hours | Blended rate | Monthly cost | Notes. 8–10 rows, ending with total cost and the margin required. Every input traceable to {{effort_estimates}}.
+2. THREE PACKAGING OPTIONS — for each option, a table:
+   Option name | Best for | Included deliverables | Monthly fee | Hours included | What it excludes | Overage rate | Minimum term | Risk for the client | Risk for us.
+   Options must be: (a) a focused starter, (b) the recommended full engagement, (c) a premium or multi-channel option.
+3. COMPARISON TABLE — Columns: Dimension | Starter | Recommended | Premium. 10 rows covering cost, speed, depth, access, and flexibility.
+4. VALUE FRAMING (120 words): what each tier buys in terms of outcomes, in outcome language, not hours.
+5. WHAT CHANGES WHEN THE CLIENT CHOOSES EACH OPTION — table: Tier | Speed of results | Reporting depth | Creative volume | Risk to results | What they must do more. 8 rows.
+6. SCALING & DE-SCALING PATH — a paragraph plus 4 bullets explaining how a client moves up or down a tier, what notice is needed, and what changes for them.
+7. ONE-TIME PROJECT ALTERNATIVE — table: Project scope | Fixed fee | Timeline | Deliverables | Why a client might prefer this over a retainer. 4 rows.
+8. PRICING OBJECTIONS — table: Objection | Response | Supporting evidence. 6 rows.
+
+RULES:
+- Show the hourly cost build-up before the fee. A client who sees the build-up treats the fee as reasonable; a client who only sees the fee argues about the total.
+- Each option must be genuinely distinct — different scope, not the same scope at three prices.
+- Never recommend an option the client's stated budget cannot support without saying so plainly in one line.
+- No package includes something you cannot staff or deliver.
+- Apply {{brand_voice_guide}} to the value framing and objection responses — they are read by the decision-maker, not the buyer.
+
+HOW TO USE:
+Send the comparison table, not the build-up, and hold the build-up for the negotiation. Make the middle option genuinely the best value and say so — clients pick the middle more often than not, and a deliberately hobbled starter wastes the conversation.
+```
+
+### 48 — Creative Brief
+
+```text
+ROLE:
+You are a creative director writing the brief that a designer, copywriter, editor, or AI tool works from — with no room for interpretation.
+
+INPUTS:
+- Client: {{client_name}}
+- Deliverable and where it runs: {{deliverable}}, {{placement}}
+- Objective: {{objective}}
+- Audience and what they know: {{audience}}
+- Single-minded proposition: {{smp}}
+- Key messages and proof: {{messages}}, {{proof_points}}
+- Brand assets: {{brand_assets}}
+- Brand voice guide: {{brand_voice_guide}}
+- Mandatory elements (legal, product, CTA): {{mandatory_elements}}
+- Dimensions, formats, and deadlines: {{formats}}, {{deadline}}
+- Examples we like and why: {{reference_examples}}
+
+OUTPUT FORMAT — produce:
+
+1. BRIEF SUMMARY TABLE — Client | Deliverable | Objective | Audience | Placement | Deadline | Approver | Version/date.
+2. THE ASK (50 words): what the audience must understand, feel, and do. One sentence for each.
+3. AUDIENCE (80 words): who they are, what they've already tried, what they believe, and the objection the work must overcome.
+4. SINGLE-MINDED PROPOSITION (1 sentence) with a box around it.
+5. MESSAGE HIERARCHY TABLE — Columns: Tier | Message | Proof | Where it appears. 3 tiers, 1 + 3 + 4 rows.
+6. TONE & VOICE: 4 lines plus a table of "Sounds like / Doesn't sound like" with 6 pairs, all derived from {{brand_voice_guide}}.
+7. VISUAL DIRECTION TABLE — Columns: Element | Direction | Do / Don't | Reference. 8 rows covering style, palette, typography, imagery, composition, lighting, texture, and format.
+8. MANDATORY COPY TABLE — Columns: Element | Exact text | Placement | Character limit. Every word that appears on the asset. Minimum 5 rows.
+9. MANDATORY ELEMENTS TABLE — Columns: Element | Requirement | Placement | Source. 6 rows including disclaimers, logo usage, CTA, hashtags, and legal lines.
+10. DELIVERABLES TABLE — Columns: Format | Dimensions | Aspect | File type | Variants | Due. All formats from {{formats}}.
+11. APPROVAL PROCESS (table): Round | Who reviews | What's being reviewed | Response expected | Date.
+12. OUT OF SCOPE (4 bullets): what this brief does not cover, to prevent scope drift.
+
+RULES:
+- The brief describes outcomes and constraints, not ideas. If you can see the answer in the brief, the brief is a design.
+- Any copy that appears on the asset is written out in full in section 8. No "placeholder headline here".
+- Do not reference named artists, real people, or competitor work as a style direction.
+- Every "don't" is a real constraint, not a preference. If it's a preference, put it in "Do".
+- Apply {{brand_voice_guide}} to sections 6 and 8 and to any example copy.
+- Deadlines in section 10 must match {{deadline}} exactly.
+
+HOW TO USE:
+Send this before any production starts. The approval process table is what prevents the third-round-of-revisions problem — put a deadline on each review and both sides commit to it.
+```
+
+### 49 — Pitch Deck for a New Business Win
+
+```text
+ROLE:
+You are a strategist preparing a 5-minute pitch to win {{client_name}}'s business. This is a live conversation, not a document.
+
+INPUTS:
+- Client: {{client_name}}
+- What we know about them: {{client_context}}
+- Their likely business priorities: {{priorities}}
+- The problem we can solve: {{problem}}
+- The outcome we can credibly produce: {{outcome}}
+- Our proof: {{case_studies}}
+- Our team and availability: {{team}}
+- Commercials: {{pricing}}
+- Brand voice guide: {{brand_voice_guide}}
+
+OUTPUT FORMAT — produce:
+
+1. PITCH OBJECTIVE (1 sentence): the single decision you want from this meeting.
+2. OPENING 60 SECONDS — the exact words to say, including the question you ask at the end. Must reference something specific about their business.
+3. PITCH STRUCTURE TABLE — Columns: Section | Duration | Message | Proof used | What we say. Total 5 minutes.
+4. THE PROBLEM FRAMING (120 words): how you describe their problem in terms that show you understand it. Written as spoken language.
+5. THE PROOF MOMENT (150 words): the case study you tell, with the client's situation, what was done, the numbers, and the caveat about comparability.
+6. THE ASK (60 words): what you want them to agree to in this meeting — usually a paid diagnostic, a pilot, or a scoped first phase.
+7. QUESTION LIST (table): Question | Why we ask | What a good answer looks like — 8 rows, including 2 questions that make the client say their problem out loud.
+8. OBJECTION RESPONSES — table: Objection | Response (spoken, 40 words) | Follow-up question. 6 rows.
+9. CLOSING 30 SECONDS — exact words, ending with a specific next step and a date.
+10. POST-PITCH FOLLOW-UP EMAIL — 150 words, sent within 2 hours: recap, the one thing that resonated, the proposed next step, and a date.
+
+RULES:
+- Everything is written for the ear. No bullet lists of sub-points inside a spoken section.
+- Never invent a fact about the client. If you don't know something, use it as a question in section 7.
+- The proof moment must state its caveat. "Comparable but not identical" is more persuasive than overselling.
+- The closing must propose a small, low-risk next step — a diagnostic or a pilot, not a full contract.
+- Apply {{brand_voice_guide}} to everything the client will hear.
+
+HOW TO USE:
+Rehearse sections 2, 5, and 9 out loud until they're boring — if they're not boring, they'll sound smooth but won't land. Send the follow-up email within two hours, and make section 10 the email you actually send, not a template.
+```
+
+### 50 — Renewal and Scope Expansion Conversation
+
+```text
+ROLE:
+You are an account director preparing a renewal conversation for {{client_name}} — the meeting where you extend, expand, or part well.
+
+INPUTS:
+- Client: {{client_name}}
+- Contract and renewal date: {{contract}}
+- Delivered vs. committed: {{delivery_performance}}
+- Results achieved: {{results}}
+- Unresolved issues or complaints: {{open_issues}}
+- What the client has asked for or hinted at: {{client_signals}}
+- Current scope and fee: {{current_scope}}, {{current_fee}}
+- Where the next period's opportunity is: {{expansion_opportunity}}
+- Brand voice guide: {{brand_voice_guide}}
+
+OUTPUT FORMAT — produce:
+
+1. RENEWAL ASSESSMENT TABLE — Columns: Dimension | Performance | Client sentiment (inferred from evidence) | Risk. 8 rows.
+2. THE HONEST SUMMARY (150 words): what the agency delivered, what fell short, and what that means. Includes at least one real shortfall and the action taken. Written to be read aloud in the meeting.
+3. RESULTS TO REPLAY (table): Metric | Baseline | Current | Change | Business meaning. 6 rows. "Business meaning" translates the metric into the client's language.
+4. THE GAP CONVERSATION — table: Gap the client may raise | How we'll acknowledge it | The fix | Timeline. 6 rows, covering the issues in {{open_issues}} plus the two most likely objections.
+5. EXPANSION OPTIONS — for each of 3 options: a table with Option name | What it adds | Fee | Why now | What the client must commit | First 30 days. Include one option that is scope reduction rather than expansion.
+6. RECOMMENDATION (100 words): which option you recommend, and why. Be explicit.
+7. VALUE REVIEW TABLE — Columns: What they received | What it was worth | Estimated value | Evidence. 8 rows, connecting deliverables to business outcomes.
+8. TALKING POINTS (table): Point | Say this | Don't say this. 8 rows.
+9. RISK REGISTER — table: Risk | Likelihood | Impact | Mitigation. 5 rows.
+10. IF THEY SAY NO — 2 paragraphs: how to close gracefully, what to ask for in the last 10 minutes (feedback, a paid off-ramp, a referral), and what to send the day after.
+
+RULES:
+- The honest summary must include at least one shortfall. Renewal conversations that hide the gap lose the client in month two instead of month twelve.
+- Never claim value you cannot evidence. If value is estimated, label it and give the basis.
+- The recommendation names one option. Offering three equally weighted options is a non-answer.
+- Do not use retention pressure, discount threats, or "we'd hate to lose you".
+- Apply {{brand_voice_guide}} to all spoken and written sections.
+
+HOW TO USE:
+Rehearse section 2 out loud. If you can't deliver the shortfall sentence without wincing, the agency has a service problem to fix before the renewal, not a negotiation problem.
+```
+
+---
+
 
 ## Client Communication & Account Management
 
-### Client status update email
-```
-Write a weekly status email to {{client_name}} for {{project}}. Structure:
-Subject: [Project] Weekly update - week of {{date}}
-1. One-line summary of progress
-2. What we completed this week (3 bullets)
-3. What's happening next (2-3 bullets)
-4. Any decisions needed from you (clear, numbered asks)
-5. A note on timeline/schedule health
-Keep it under 200 words. No jargon. No fluff.
-```
-**How to use:** Send as-is with your real progress. **What good looks like:** The client can act on it without a follow-up call.
+### 51 — Weekly Client Update Email
 
-### Scope-creep boundary message
+```text
+ROLE:
+You are an account manager writing the weekly client update for {{client_name}}. The email should take 90 seconds to read and make the client feel informed without needing a call.
+
+INPUTS:
+- Client and contact: {{client_name}}, {{contact_name}}
+- Week covered: {{period}}
+- What was shipped: {{production_log}}
+- Performance highlights: {{performance_data}}
+- Problems or blockers: {{blockers}}
+- Work starting next week: {{next_week}}
+- Anything needed from the client: {{client_actions}}
+- Brand voice guide: {{brand_voice_guide}}
+
+OUTPUT FORMAT — produce:
+
+1. SUBJECT LINE — 3 options, each under 55 characters, with the angle noted.
+2. PREHEADER — 1, 40–90 chars.
+3. EMAIL BODY:
+   - Opening (30 words): what this week was about, in one line.
+   - SHIPPED (table): What | Channel | Status | Result. 4–7 rows. Result is a number where one exists.
+   - PERFORMANCE (2–3 bullets): each a number plus what it means, not a metric dump.
+   - WATCHING / BLOCKERS (1–3 bullets): what needs attention and what we're doing. If there are none, say "Nothing needs your attention this week — details below if you want them."
+   - NEXT WEEK (3 bullets): what lands next week and why it matters.
+   - ONE ASK (max 40 words): the single thing you need from the client, with a deadline.
+   - Sign-off.
+4. PLAIN-TEXT VERSION of the whole email.
+5. FOLLOW-UP TASK LIST (internal, not for the client): Task | Owner | Due | Context. 5 rows.
+
+RULES:
+- Never send a status update that contains no information. If nothing happened, say why — that is information.
+- Performance bullets must translate numbers: "Cost per lead fell from $140 to $96" not "CPL: $96".
+- Blockers are stated plainly with a proposed fix. Do not soften a problem into ambiguity.
+- Only one ask. Multiple asks get ignored.
+- Apply {{brand_voice_guide}} throughout — this is the email the client reads every week and it sets their impression of your competence.
+- No scheduling requests hidden in the body. If you want a call, put it in the One ask with a specific time option.
+
+HOW TO USE:
+Send it Friday afternoon, or Monday morning for a week that included a launch. The internal task list at the end is what stops a request made in the email from being forgotten — copy it straight into your task manager.
 ```
-The client {{client_name}} has asked for {{new_request}} which is outside the agreed scope of {{project}}. Draft a professional message that:
-1. Thanks them for the request
-2. Acknowledges its value
-3. States clearly it's outside the current scope
-4. Offers a path: a quote for the add-on, or deferring it
-5. Keeps the relationship warm
-Keep it 120-150 words. Do not be defensive.
+
+### 52 — Escalation Email for a Delivery or Performance Issue
+
+```text
+ROLE:
+You are an account director writing the email that tells a client something has gone wrong — before they find out themselves. It must be factual, fast, and contain the fix.
+
+INPUTS:
+- Client and contact: {{client_name}}, {{contact_name}}
+- What happened: {{issue}}
+- When it started and how it was detected: {{timeline}}
+- Impact: {{impact}}
+- Root cause (known or suspected): {{root_cause}}
+- What we've already done: {{actions_taken}}
+- The fix and who owns it: {{fix_plan}}
+- What we're asking of the client, if anything: {{client_action}}
+- Brand voice guide: {{brand_voice_guide}}
+
+OUTPUT FORMAT — produce:
+
+1. SUBJECT LINE — 3 options. The most direct one is recommended. No euphemism in the subject line; a vague subject line makes a bad situation worse.
+2. PREHEADER — one line stating the impact.
+3. EMAIL BODY:
+   - WHAT HAPPENED (80 words): the facts, in plain language, in chronological order. No hedging, no passive voice hiding the actor.
+   - IMPACT (60 words): what it means for the client, in their terms — results, deadlines, money, reputation. Include a number if one exists.
+   - WHAT WE KNOW AND DON'T (bullet list): confirmed cause, suspected cause, and explicitly what we don't know yet.
+   - WHAT WE'VE DONE (bullet list): actions already taken, each with a timestamp or status.
+   - THE FIX (table): Action | Owner | Complete by | Status. 4–6 rows, with the first row already in progress.
+   - WHAT WE NEED FROM YOU (max 50 words): the specific decision, access, or approval needed, with a deadline. Write "Nothing needed from you right now — I'll send the update by [date]" if that's true.
+   - NEXT UPDATE COMMITMENT: exact date and time of the next update, and what it will contain.
+   - Sign-off with name, role, and direct contact details.
+4. INTERNAL ACTION PLAN (table): Action | Owner | Due | Status — 6 rows.
+5. THE FOLLOW-UP UPDATE (email, 120 words): the next update, written as it would be sent, with a placeholder for the outcome.
+
+RULES:
+- Lead with the fact, not with reassurance. No "I wanted to reach out" before the issue.
+- Never speculate on cause in the first email unless you label it as suspected. If you don't know, say you don't know yet and when you will.
+- No blame on the client, the vendor, or a third party — state the cause as a system failure, not a person's failure, even if it's traceable to a person.
+- Own the failure in one sentence without over-apologising. One apology is accountability; three is anxiety.
+- Never promise a root cause before the investigation is complete. Promise a time.
+- Apply {{brand_voice_guide}} — but check it: some guides specify a warmer register that would be wrong here. In that case, state the deviation and why.
+
+HOW TO USE:
+Send within two hours of confirming the issue, before you have the full root cause. A fast, honest email with a partial cause reads as competence; a slow, complete one reads as concealment. Never let a client discover the problem in a report.
 ```
-**How to use:** When the client adds unplanned work. **What good looks like:** Firm but friendly, keeps the door open.
+
+### 53 — Meeting Agenda With Pre-Read
+
+```text
+ROLE:
+You are an account manager preparing a client meeting agenda and its pre-read, so the meeting spends its time on decisions rather than status.
+
+INPUTS:
+- Client, attendees, and their roles: {{attendees}}
+- Meeting purpose and duration: {{purpose}}, {{duration}}
+- Agenda items from the client: {{client_agenda}}
+- Status of each account area: {{account_status}}
+- Decisions needed: {{decisions_required}}
+- Materials to share in advance: {{materials}}
+- Brand voice guide: {{brand_voice_guide}}
+
+OUTPUT FORMAT — produce:
+
+1. MEETING DETAILS TABLE — Client | Date | Duration | Attendees | Format (call/in-person) | Who runs it | Who takes notes.
+2. OBJECTIVE (1 sentence): what is true at the end of this meeting that is not true now.
+3. AGENDA TABLE — Columns: Time | Item | Lead | Purpose | Decision or output | Material needed. Rows sum exactly to {{duration}}, with a 5-minute buffer at the end for actions.
+4. PRE-READ EMAIL (200 words): what's attached, what to look at, the three questions we want answered, and how long the pre-read takes. Written in {{brand_voice_guide}}.
+5. ITEM PREP TABLE — Columns: Agenda item | Current state (2 sentences) | Key number | Risk | Decision options | Our recommendation. One row per agenda item.
+6. DECISION LOG (pre-filled): Decision | Options | Who decides | Needed by | Consequence of no decision.
+7. OPEN QUESTIONS TABLE — Question | Why we need it | Who can answer | Fallback if unanswered. 6 rows.
+8. ACTION LOG (blank, for live capture): Action | Owner | Due | Notes.
+9. NOTES TEMPLATE (post-meeting): Summary (5 bullets) | Decisions made | Actions | Open items | Next meeting date.
+
+RULES:
+- Every agenda row has a named lead and a stated output. An item with no output is a conversation, and conversations don't fit in meetings.
+- Status updates that can be written go in the pre-read, not in the meeting. The meeting is for decisions, disagreements, and anything requiring the client's judgement.
+- The decision log must be pre-filled with consequences — "consequence of no decision" is what creates urgency.
+- Never schedule more than 3 decision items in a 60-minute meeting.
+- The pre-read email asks questions rather than listing topics. "Which of these two routes do you prefer, and why?" gets a better answer than "Please review attached."
+
+HOW TO USE:
+Send the pre-read 24–48 hours ahead — 24 hours for routine meetings, 48 for anything with decisions. If the client doesn't read the pre-read, don't cancel the agenda; move those items into a written update and use the meeting time for what only they can answer.
+```
+
+### 54 — Client Onboarding Plan and Kickoff Agenda
+
+```text
+ROLE:
+You are a producer building the 4-week onboarding plan for a new {{client_name}} account, and the kickoff agenda that starts it.
+
+INPUTS:
+- Client and account team: {{client_name}}, {{team}}
+- Scope and deliverables: {{scope}}
+- Systems and tools the client uses: {{tools}}
+- Stakeholders and their availability: {{stakeholders}}
+- Access or assets required from the client: {{access_required}}
+- Contracted start date: {{start_date}}
+- Brand voice guide: {{brand_voice_guide}}
+
+OUTPUT FORMAT — produce:
+
+1. ONBOARDING OBJECTIVE (1 sentence): what a fully onboarded client looks like at the end of week 4.
+2. WEEKLY PLAN TABLE — Columns: Week | Theme | Milestone at week end | Agency tasks | Client tasks | Deliverable produced | Meeting. 4 rows.
+3. WEEK 1 — ACCESS & DISCOVERY: table of tasks — Task | Owner | Due | Dependency | Status. 10 rows covering accounts, analytics, brand assets, past performance, key contacts, and competitor list.
+4. WEEK 2 — STRATEGY & POSITIONING: tasks table, 8 rows, ending with an approved strategy one-pager.
+5. WEEK 3 — CREATIVE & APPROVAL PROCESS: tasks table, 8 rows, ending with approved creative routes and an agreed review SLA.
+6. WEEK 4 — PLAN & LAUNCH READINESS: tasks table, 8 rows, ending with the first calendar, campaign build, and live plan.
+7. ACCESS CHECKLIST TABLE — Columns: # | Access or asset | Platform | Needed by | Owner | What it blocks | Status. 12 rows.
+8. KICKOFF AGENDA — table: Time | Item | Purpose | Lead | Output. Rows sum to 60 minutes. Items: introductions and roles, business goals, what's working and what isn't, brand and audience, scope and boundaries, access and tools, comms and cadence, next 30 days.
+9. STAKEHOLDER MAP TABLE — Columns: Person | Role | What they own | How they like to be communicated | Approval authority. 6 rows. If preferences are unknown, write [CONFIRM IN KICKOFF].
+10. COMMUNICATION CADENCE TABLE — Columns: Meeting | Frequency | Duration | Attendees | Agenda source | Notes sent by. 6 rows.
+11. RISK REGISTER — table: Risk | Likelihood | Impact | Mitigation | Owner. 6 rows, including slow access, unclear approvals, and missing historical data.
+12. ONBOARDING COMPLETION CHECKLIST — table: Check | Complete? — 12 items, defining "done".
+
+RULES:
+- Every week ends with a client-approval milestone. Onboarding that ends with "everything set up" and no sign-off has failed.
+- Client tasks are named and dated so delay surfaces in week 1, not week 4.
+- The kickoff agenda has no item longer than 15 minutes.
+- Never assume a tool the client has mentioned once is their standard — confirm it.
+- Apply {{brand_voice_guide}} to every client-facing line in this plan.
+
+HOW TO USE:
+Use the week 1 access checklist as the first thing you chase after kickoff. Most onboarding delays are access delays, and chasing them on day 2 costs nothing. Set the first weekly meeting before the kickoff ends.
+```
+
+### 55 — Client Status Summary for Internal Use
+
+```text
+ROLE:
+You are a delivery lead writing the internal account status summary for {{client_name}} — the document you read before touching anything on the account.
+
+INPUTS:
+- Client: {{client_name}}
+- Account status by workstream: {{workstream_status}}
+- Delivered vs. committed this period: {{delivery_performance}}
+- Open issues, blockers, and complaints: {{open_issues}}
+- Budget and margin: {{budget}}, {{margin}}
+- Client relationship signals: {{relationship_signals}}
+- Upcoming deadlines: {{deadlines}}
+- Team capacity: {{capacity}}
+- Brand voice guide: {{brand_voice_guide}}
+
+OUTPUT FORMAT — produce:
+
+1. ACCOUNT SNAPSHOT TABLE — Client | Sector | Account lead | Contract value | Margin | Contract end | Status (Green / Amber / Red). One row.
+2. STATUS SUMMARY (120 words): the state of the account in plain terms, for a colleague who has never worked on it.
+3. WORKSTREAM STATUS TABLE — Columns: Workstream | Status | This period's output | Next commitment | Owner | Date. 8 rows.
+4. COMMITMENT TRACKING TABLE — Columns: Commitment | Promised date | Delivered? | Variance | Impact | Action to recover. 8 rows.
+5. OPEN ISSUES TABLE — Columns: Issue | Severity | Owner | Status | Client visibility | Next update due. 6 rows.
+6. RELATIONSHIP SIGNALS TABLE — Signal | Evidence | What it might mean | Suggested response. 8 rows.
+7. COMMERCIAL TABLE — Columns: Metric | Value | Target | Variance | Note. 6 rows including hours vs. budget, margin, and cost-to-serve.
+8. UPCOMING 30 DAYS — table: Date | Event or deadline | Risk | Preparation needed. 8 rows.
+9. RED FLAGS — 3 bullets: the things that would make you escalate internally this week.
+10. RECOMMENDED ACTIONS — table: Action | Owner | Due | Why now. 6 rows.
+11. HANDOFF NOTE (100 words): if this account had to be handed to a new lead tomorrow, what they must know that isn't in the system.
+
+RULES:
+- Status colours use a defined rubric: Green = on plan; Amber = a commitment is at risk or a signal is negative; Red = a commitment will be missed or the client is unhappy.
+- Relationship signals must cite evidence — a meeting comment, an email, a delayed reply. No instinct presented as fact.
+- The red flags section must name real risks, not padding. If nothing is red, say "None this week" and move on.
+- Never write client-facing content here — this is internal.
+- Apply {{brand_voice_guide}} only where the note will be pasted into a client message (section 11's wording).
+
+HOW TO USE:
+Write this on Friday afternoon for the following week. It takes ten minutes and it is how a struggling account gets noticed at week 2 instead of week 8.
+```
+
+### 56 — Difficult Conversation Preparation
+
+```text
+ROLE:
+You are an account director preparing for a difficult conversation with {{client_name}} — a budget cut, a scope reduction, a complaint, a missed deadline, or a strategic disagreement. You want the outcome defined before you speak.
+
+INPUTS:
+- Client and contact: {{client_name}}, {{contact_name}}
+- The topic: {{topic}}
+- What the client has said or done so far: {{client_signals}}
+- Our position and what we can concede: {{our_position}}
+- The outcome we want: {{desired_outcome}}
+- Facts we can rely on: {{facts}}
+- Commercial impact: {{commercial_impact}}
+- Brand voice guide: {{brand_voice_guide}}
+
+OUTPUT FORMAT — produce:
+
+1. OUTCOME DEFINITION TABLE — What we want | Why | What we'd accept | What we won't accept. 4 rows.
+2. THE FACTS (100 words): the neutral facts of the situation, written as they'd appear in a document, with no spin. If a fact is contested, mark it.
+3. POSITION AND TRADE-OFFS TABLE — Columns: Issue | Our ask | What we give | What we get | Acceptable? | Walk-away point. 6 rows.
+4. OPENING 60 SECONDS — exact words, starting with the shared goal and moving to the issue. No throat-clearing, no blame.
+5. THE THREE HARD QUESTIONS — table: Question | Why we're asking | Best answer | Worst answer and our response. 3 rows. These are the questions you're dreading; prepare them properly.
+6. ARGUMENT MAP (table): Their likely argument | The real concern underneath | Our response | Evidence. 6 rows.
+7. EMPATHY STATEMENTS — 4 ways to acknowledge their position, each phrased so it doesn't sound like a manoeuvre. Mark any that would ring false.
+8. CONCESSION PLAN — table: What we can offer | Cost to us | When to offer it | Never offer. 5 rows.
+9. IF IT GOES BADLY — 2 paragraphs: the escalation path, what to pause, and what not to say in the room.
+10. FOLLOW-UP EMAIL (150 words): sent within 2 hours, confirming what was agreed, what remains open, and what happens next. Written in {{brand_voice_guide}}.
+11. INTERNAL ALIGNMENT CHECKLIST (table): Check | Confirmed? — 8 items, including who else should be on the call, the walk-away point, and the commercial ceiling.
+
+RULES:
+- Prepare the walk-away point before the meeting, not during it.
+- Never use emotional manipulation, guilt, or urgency that isn't real. If the client is right about something, say so in the opening.
+- Facts must be verifiable. If a number is contested, present both versions.
+- The empathy statements must be things you'd be comfortable saying directly.
+- Don't propose a solution in the first 60 seconds.
+
+HOW TO USE:
+Run this the day before the conversation and read section 4 aloud. If the opening sounds like a script you've memorised, rewrite it until it sounds like something you'd say to a colleague — the client will hear the difference.
+```
+
+---
+
 
 ## Quality Control & QA
 
-### Deliverable QA checklist
-```
-Generate a QA checklist for the deliverable {{deliverable}} type {{type}} for {{client_name}}. Include:
-1. Completeness - does it meet the brief's requirements?
-2. Brand accuracy - logo, colors, fonts, tone match the brand guide?
-3. Facts & figures - all numbers verified against source?
-4. Links & assets - every link works, all assets included?
-5. Spelling & grammar
-6. Formatting - exports cleanly to PDF/Docs/Sheets
-7. Client-readiness - would you send this to the client as-is?
-Output as a checkbox list with a pass/fail column.
-```
-**How to use:** Run on every deliverable before it ships. **What good looks like:** A checklist that catches real errors before the client does.
+### 57 — Pre-Send Client Deliverable Checklist and Final Review
 
-### Brand voice enforcement check
+```text
+ROLE:
+You are the QA lead who signs off every client deliverable before it leaves the agency. You are the last line of defence, and you are allowed to fail the document.
+
+INPUTS:
+- Deliverable type: {{deliverable_type}}
+- The deliverable content: {{deliverable_content}}
+- Brand voice guide: {{brand_voice_guide}}
+- Approved claims list: {{approved_claims}}
+- Client brief or strategy it must satisfy: {{brief}}
+- Deadline and recipient: {{deadline}}, {{recipient}}
+
+OUTPUT FORMAT — produce:
+
+1. QA VERDICT — one of PASS / PASS WITH MINOR EDITS / FAIL — with the count of critical issues, major issues, and minor issues found.
+2. ISSUE LOG — Columns: ID | Severity (Critical / Major / Minor) | Category | Location | Issue | Why it matters | Required fix | Owner. All issues, minimum 8 rows. Include at least one item in each severity band if the document has them.
+3. STRUCTURE CHECK — table: Required element (from {{brief}}) | Present? | Correct? | Notes. 12 rows covering every element the brief promised.
+4. FACT AND CLAIM CHECK — table: Claim or number in the document | Source | Verified? | Where verified | Action. 10 rows. Anything unverifiable is flagged Critical.
+5. BRAND VOICE CHECK — table: Test | Pass condition | Result | Fix. 8 rows covering banned words, reading level, sentence length, jargon, tone consistency, and proof style.
+6. COPY EDIT — table: Location | Current text | Corrected text | Reason. The actual edits, ready to apply, 8–15 rows.
+7. FORMATTING AND CONSISTENCY CHECK — table: Check | Pass condition | Result. 10 rows covering dates, numbers formatting, currency, headline case, table alignment, page numbers, file naming, and version/date stamps.
+8. LINK AND ASSET CHECK — table: Link or asset | Working? | UTM correct? | Alt text present? | Rights cleared? | Action. 8 rows.
+9. FINAL CHECKLIST — table: Check | Result — the 20-item pre-send checklist (see the Client-ready checklist section of this pack), with a one-line pass condition per item.
+10. SIGN-OFF — table: Checked by | Date | Version | Approved for sending? | Notes.
+
+RULES:
+- Be strict. A deliverable that goes out with an unverified statistic or a broken link costs more than one that goes out a day late.
+- Do not rewrite the document wholesale. The copy edit table lists discrete, applicable changes.
+- If a required element is missing from {{brief}}, that is a Critical issue, not a note.
+- Never mark something verified because it looks right. If the source isn't in the input, mark it unverified.
+- Flag anything that will embarrass the agency — a placeholder, a lorem ipsum, a "[NEEDS INPUT]" left in a final document, an internal note, a competitor's name.
+
+HOW TO USE:
+Run this on every deliverable, including the ones you wrote. The [NEEDS INPUT] check alone catches more mistakes than any other single item on the list.
 ```
-Check the text below against the client's brand voice guide {{brand_voice_guide}}:
-{{text_to_check}}
-Report: (1) which phrases violate the guide, (2) why, (3) a corrected version of each. Flag any jargon or tone shifts.
+
+### 58 — Client Document De-Jargon and Readability Pass
+
+```text
+ROLE:
+You are a copy editor making a client deliverable read like a competent human wrote it, at the reading level of the client's most senior stakeholder.
+
+INPUTS:
+- Deliverable content: {{content}}
+- Intended reader and their role: {{reader}}
+- Reader's likely technical knowledge: {{reader_knowledge}}
+- Brand voice guide: {{brand_voice_guide}}
+- Industry terms the audience genuinely knows: {{industry_terms}}
+
+OUTPUT FORMAT — produce:
+
+1. READABILITY ASSESSMENT — table: Test | Result | Target. 8 rows: average sentence length, longest sentence, passive voice %, reading grade, jargon density, unexplained acronyms, average paragraph length, hedging phrases. State the target for the reader.
+2. REWRITE TABLE — Columns: Location | Original | Rewrite | Reason | Sentence length before | Sentence length after. 15–25 rows, focusing on the worst passages.
+3. JARGON REGISTER — table: Term | Keep or replace | If replace, with what | If keep, add explanation | 12 rows.
+4. UNEXPLAINED ACRONYMS — table: Acronym | First use | Full form needed? | Plain English version. 8 rows.
+5. HEDGING AND SOFTENING — table: Phrase | Problem | Stronger version. 10 rows.
+6. OPENING AND CLOSING STRENGTH — table: Section | Current opening | Suggested opening | Reason. 4 rows (cover, exec summary, first section, closing).
+7. PASSIVE AND NOMINALISED VERBS — table: Original | Active version | 12 rows.
+8. READ-BACK SUMMARY — 100 words: what this document now sounds like, and the three biggest changes.
+
+RULES:
+- Do not simplify to the point of being inaccurate or patronising. A client who is a marketer does not need "ad" explained.
+- Replace jargon with plain language only when the plain version carries the same meaning.
+- Keep every number, claim, and proper noun exactly as supplied. This is a language pass, not a facts pass.
+- Apply {{brand_voice_guide}} — a brand voice guide that mandates formality is not a reason to keep unclear sentences.
+- Where the client's own words are quoted, do not edit them. Quoted client language stays verbatim, even if it is less tidy.
+
+HOW TO USE:
+Use this after the content is complete and before the QA pass. The most common cause of "this feels off" client feedback is not wrong work — it's work written in a register the reader doesn't use.
 ```
-**How to use:** Paste any draft copy. **What good looks like:** Specific fixes, not a generic "make it more on-brand."
+
+### 59 — Consistency Check Across a Deliverable Set
+
+```text
+ROLE:
+You are the QA lead checking a set of related client deliverables for internal consistency — the same fact, number, name, or date must not contradict itself across documents.
+
+INPUTS:
+- The deliverables: {{deliverables}} (list each with its name and content)
+- Brand voice guide: {{brand_voice_guide}}
+- Source of truth for facts and numbers: {{source_of_truth}}
+- Terminology list: {{terminology}}
+- Client's naming conventions: {{naming_conventions}}
+
+OUTPUT FORMAT — produce:
+
+1. CROSS-DOCUMENT MATRIX — Columns: Fact or element | Doc A | Doc B | Doc C | Consistent? | Correct version | Action. 15 rows, comparing figures, dates, names, offer details, price, guarantees, and KPI definitions.
+2. INCONSISTENCY LOG — Columns: ID | Element | Doc 1 says | Doc 2 says | Severity | Correct value | Docs to update. All genuine conflicts, minimum 6 rows.
+3. TERMINOLOGY CHECK — table: Term | Used as | Should be | Docs affected | Action. 10 rows.
+4. NAMING AND FORMAT CHECK — table: Element | Convention | Applied consistently? | Docs affected. 8 rows covering client name, product name, campaign names, file naming, and date formats.
+5. TONE CONSISTENCY TABLE — Columns: Document | Voice adherence | Register match | Terminology | Notes | Fix. One row per document.
+6. CROSS-REFERENCE INTEGRITY — table: Reference in Doc A | Target exists in Doc B? | Link or page reference valid? | Fix. 8 rows.
+7. NUMERIC HARMONISATION TABLE — Columns: Metric | Value in Doc A | Value in Doc B | Value in Doc C | Source of truth | Action. 8 rows.
+8. FINAL CONSISTENCY VERDICT — PASS / FAIL, with the count of blocking inconsistencies and a list of the files that must be updated before sending.
+
+RULES:
+- The source of truth wins. If a document contradicts {{source_of_truth}}, the document is wrong.
+- A mismatch in a headline number is Critical. A mismatch in a phrasing is Minor.
+- Check dates especially: reporting periods, launch dates, contract dates, and "as of" stamps.
+- Do not silently harmonise. List every document that needs an edit.
+- Verify the voice guide is applied consistently across every document, including the ones written first.
+
+HOW TO USE:
+Run this whenever a set of deliverables goes to the client together — a proposal plus a scope, a report plus a deck, a calendar plus the copy. Contradictions between two documents from the same agency are noticed immediately and read as carelessness.
+```
+
+### 60 — Accessibility and Platform Compliance Check
+
+```text
+ROLE:
+You are a QA specialist checking client content for accessibility and platform rule compliance before publication.
+
+INPUTS:
+- Content and assets: {{content}}
+- Platform(s) it's published on: {{platforms}}
+- Asset types included: {{asset_types}}
+- Brand voice guide: {{brand_voice_guide}}
+- Accessibility standard required by the client: {{a11y_standard}}
+
+OUTPUT FORMAT — produce:
+
+1. COMPLIANCE VERDICT — table: Area | Status (Pass / Fail / Review) | Issues. 10 rows covering alt text, captions, colour contrast, reading order, link text, heading hierarchy, file size, character limits, hashtag rules, disclosure requirements.
+2. ACCESSIBILITY ISSUES — table: ID | Element | Issue | Why it matters | Exact fix | Severity. Minimum 8 rows.
+3. ALT TEXT INVENTORY — table: Asset | Existing alt text | Suggested alt text | Decorative? | Action. One row per image, minimum 6 rows. Alt text describes the image's purpose in context, not its appearance alone.
+4. CAPTIONS AND TRANSCRIPTS TABLE — Element | Transcript or caption provided? | Accuracy check | Speaker labels | Action. 6 rows.
+5. COLOUR CONTRAST TABLE — Element | Foreground | Background | Ratio | Required | Pass? | Fix. 8 rows.
+6. HEADING HIERARCHY — the document outline as a list, with any skipped levels or misordered headings flagged.
+7. PLATFORM RULE CHECK — table: Rule | Requirement | Current status | Fix. 10 rows for the specific rules of {{platforms}}: character limits, link count, hashtag placement, video length, image ratios, disclosure wording, and prohibited content.
+8. PLAIN-LANGUAGE CHECK — table: Passage | Issue | Plain version | 6 rows.
+9. HEADLESS REVIEW NOTE (80 words): what a screen reader user would experience on this asset, and what would break.
+
+RULES:
+- Alt text must convey the same information a sighted reader gets, including text inside the image.
+- Contrast ratios state the actual computed value, not "looks fine".
+- Never describe a person in alt text by assumed attributes — describe the role and action.
+- Platform rules must be checked against the current published rules, and the check dated.
+- Any missing caption on a video is a Critical issue.
+
+HOW TO USE:
+Run this before anything is published, not after a client complains. Include the alt text inventory in the designer's ticket — writing alt text at upload time is always late.
+```
+
+### 61 — Brand Voice Enforcement Pass
+
+```text
+ROLE:
+You are a copy editor enforcing {{brand_voice_guide}} across a client deliverable — bringing the writing to the guide, not replacing the writer's judgement.
+
+INPUTS:
+- Content: {{content}}
+- Brand voice guide: {{brand_voice_guide}}
+- Voice traits and their definitions: {{voice_traits}}
+- Banned words and phrases: {{banned_words}}
+- Required proof style: {{proof_style}}
+- Audience and reading level target: {{audience}}, {{reading_level}}
+- Words the client uses deliberately (do not change): {{protected_terms}}
+
+OUTPUT FORMAT — produce:
+
+1. VOICE SCORECARD — table: Trait | Score (1–5) | Evidence | What pulled it down | Target. One row per trait in {{voice_traits}}, minimum 5 rows.
+2. VIOLATION TABLE — Columns: ID | Location | Current text | Suggested rewrite | Rule broken | Severity. 12–20 rows, prioritised by severity.
+3. BANNED WORD SWEEP — table: Word or phrase | Occurrences | Locations | Replacement | Note. Every occurrence, including inside compounds.
+4. TONE SHIFT TABLE — Columns: Section | Current tone | Guide tone | Change made | Reason. 8 rows.
+5. SENTENCE AND PARAGRAPH RHYTHM — table: Element | Observation | Fix. 6 rows covering sentence length variance, rhythm monotony, paragraph density, and openings.
+6. EMOJI, PUNCTUATION AND CAPS — table: Element | Current use | Guide rule | Fix. 6 rows.
+7. REWRITE SUMMARY — 80 words: what the voice pass changed about the document's character, and any tension between the guide and the client's commercial goal.
+
+RULES:
+- Enforce the guide where it is specific. Where the guide is vague, do not impose a preference — flag the ambiguity and propose a house rule.
+- Never change meaning, numbers, names, or claims. Voice only.
+- If the guide's rules conflict with each other, point out the conflict and choose the more specific rule, then note it.
+- Do not apply the same rewrite twice — every change is distinct.
+- Protect the words in {{protected_terms}} even if they look banned.
+- If the content needs a different register than the guide prescribes for a specific channel, note it rather than flattening it.
+
+HOW TO USE:
+Run this after the copy is written and before the QA checklist. The most valuable output is often section 1: a trait scoring 2 out of 5 tells you the voice guide needs an example, not that the copy needs fixing.
+```
+
+### 62 — Rework Notes for Internal Designers and Writers
+
+```text
+ROLE:
+You are a creative director writing specific, actionable rework notes for a designer or writer — the notes that get changes made on the first pass.
+
+INPUTS:
+- The work to review: {{work}}
+- What it must achieve: {{objective}}
+- Brand voice guide: {{brand_voice_guide}}
+- Brand assets and style rules: {{brand_assets}}
+- The brief it was made against: {{brief}}
+- What the client has already said about it: {{client_feedback}}
+
+OUTPUT FORMAT — produce:
+
+1. WHAT'S WORKING (3 bullets): specific things to protect in the rework. Rework that loses the good parts is worse than no rework.
+2. REWORK NOTES TABLE — Columns: ID | Location or element | Current | Change required | Reason | Priority (Must / Should / Could) | Owner. 12–18 rows. Every note points to a location and describes the change, not the principle.
+3. REFERENCE DIRECTION TABLE — Columns: Element | What we want | What we don't | Reference | 8 rows.
+4. COPY CHANGES TABLE — Columns: Location | Current copy | New copy | Reason | Character limit impact. 8 rows. Write the replacement copy in full.
+5. COMPOSITION CHANGES (table): Element | Change | Reason | Priority — 6 rows.
+6. SPEC COMPLIANCE TABLE — Columns: Spec | Required | Actual | Fix. 8 rows covering dimensions, file formats, weight, colour mode, resolution, naming, and delivery format.
+7. ACCESSIBILITY REMINDERS (table): Element | Requirement | Action — 5 rows.
+8. CLIENT-FACING NOTE — 80 words: a short, warm, specific note you can send with the rework. Reference what they liked, name the changes plainly, and give a date. Written in {{brand_voice_guide}}.
+9. DEADLINE & HANDOFF — table: Item | Owner | Due | Format | 6 rows.
+
+RULES:
+- "Make it pop", "more dynamic", and "doesn't feel on-brand" are not notes. Every note must state the change concretely.
+- Write the replacement copy in full — writers who receive rewrites don't rewrite.
+- If the client's feedback conflicts with the brief, flag it and ask for a decision rather than guessing.
+- Priorities are honest: if everything is a Must, nothing is.
+- Never include internal margin, cost, or client-budget commentary in the client-facing note.
+
+HOW TO USE:
+Use this instead of a voice-note review or a red-pinned PDF. The client-facing note at the end takes two minutes to send and prevents the "that wasn't what I meant" call, which costs far more than the review.
+```
+
+---
+
 
 ## Brand Voice & Tone
 
-### Brand voice guide extractor
-```
-From the client's existing materials (website, emails, socials) listed here: {{source_materials}}, distill a reusable brand voice guide:
-1. Three adjectives describing the voice
-2. Do's (5) and Don'ts (5)
-3. Sentence & paragraph rhythm guidance
-4. Words to prefer / avoid
-5. Emoji and formatting rules
-6. Example: on-brand vs off-brand rewrite of the same line
-Output in a clean reference format.
-```
-**How to use:** Run once per client to build their {{brand_voice_guide}}. **What good looks like:** A guide the whole team can follow.
+### 63 — Build a Brand Voice Guide From Existing Content
 
-### Voice-tone variant generator
-```
-Rewrite this copy for {{client_name}} in three tones: professional, friendly, and punchy. Keep meaning identical.
-Original: {{copy}}
-Output each as a labeled version, then a one-line note on which fits which use case.
-```
-**How to use:** When a single piece needs to suit different channels. **What good looks like:** Three genuinely different, usable variants.
-"""
+```text
+ROLE:
+You are a brand strategist reverse-engineering a voice guide from the writing a company already produces. You are documenting what the brand sounds like, not inventing a new voice.
 
+INPUTS:
+- Brand voice guide if one exists: {{existing_voice_guide}}
+- Existing copy samples (at least 8, across channels): {{copy_samples}}
+- Website copy: {{website_copy}}
+- Social posts, ads, and email samples: {{channel_samples}}
+- Audience: {{audience}}
+- Brands or people whose voice the client admires: {{voice_references}}
+- Words the client hates: {{hated_words}}
+- Industry and sector: {{industry}}
+
+OUTPUT FORMAT — produce:
+
+1. VOICE IN ONE LINE (max 20 words): a single sentence describing how this brand sounds, with a named reference.
+2. TRAITS TABLE — Columns: Trait | What it means at the sentence level | Sounds like | Doesn't sound like | Before → After example. 5–6 rows. Every trait must be evidenced by a sample from {{copy_samples}}.
+3. PATTERN ANALYSIS — table: Pattern | Frequency in samples | Example | Rule to codify. 10 rows, covering sentence length, contractions, punctuation, question use, second person, jargon, superlatives, hedging, emoji, and numbers.
+4. MECHANICS TABLE — Columns: Element | Observed rule | Guideline. 10 rows: reading level, average sentence length, longest sentence, paragraph length, capitalisation, contractions, exclamation marks, emoji policy, acronym handling, number formatting.
+5. WE USE / WE DON'T USE — two-column table: We use | We don't use | Why | 20 rows.
+6. CHANNEL REGISTER TABLE — Channels: Website, Email, Paid social, Organic social, Ads, Proposals, Internal. Columns: Channel | Register shift | What changes | What stays constant. One row per channel.
+7. VOICE RISKS (4 bullets): where this voice is most likely to break, and the early warning sign for each.
+8. OPEN QUESTIONS FOR THE CLIENT (5 items): where the samples are inconsistent and we need a decision.
+
+RULES:
+- Every trait must be traceable to at least two samples. If the brand isn't consistent there, it goes in section 8, not in the traits table.
+- Do not import a vocabulary the brand doesn't use. If the samples never use "solutions", it doesn't go in the guide.
+- If {{existing_voice_guide}} contradicts the samples, say so explicitly and show the contradiction — a guide nobody follows is a common cause.
+- Write the one-line voice and the traits in the brand's own voice, not in the language of voice theory.
+- Do not include any trait the client can't recognise when you read it back.
+
+HOW TO USE:
+This is how you build a voice guide for a client who doesn't have one — and most clients don't have one, they have a pile of inconsistent posts. Send section 8 first: getting those five decisions answered turns a document full of guesses into a guide the team will actually use.
+```
+
+### 64 — Rewrite Copy Into the Brand Voice
+
+```text
+ROLE:
+You are a copy editor rewriting content so it matches {{brand_voice_guide}} exactly, without changing meaning, facts, or claims.
+
+INPUTS:
+- Content to rewrite: {{content}}
+- Brand voice guide: {{brand_voice_guide}}
+- Voice traits and definitions: {{voice_traits}}
+- Banned words and phrases: {{banned_words}}
+- Required proof style: {{proof_style}}
+- Audience and reading level: {{audience}}, {{reading_level}}
+- Words the client uses deliberately: {{protected_terms}}
+- What the content must achieve (and the CTA): {{objective}}
+
+OUTPUT FORMAT — produce:
+
+1. REWRITE TABLE — Columns: ID | Location | Original | Rewritten | Rule applied | Words before | Words after. 15–25 rows. Every rewrite must be a distinct, applicable change.
+2. VOICE TRAIT CHECK — table: Trait | Was present? | Now enforced? | How. One row per trait, minimum 5 rows.
+3. BANNED PHRASE REMOVAL — table: Phrase found | Location | Replacement used | Note. Every occurrence.
+4. PUNCTUATION AND EMOJI PASS — table: Location | Before | After | Rule. 8 rows.
+5. READABILITY IMPROVEMENT — table: Location | Before | After | Readability change. 8 rows.
+6. TONE SHIFTS BY SECTION — table: Section | Original tone | Rewritten tone | Reason for the change. 6 rows.
+7. WHAT I DIDN'T CHANGE (5 bullets): the awkward, strange, or technically imprecise bits left alone, and why.
+8. FINAL READ (200 words): the rewritten content in full, as it should be sent.
+
+RULES:
+- Never change a number, a name, a date, a link, or a claim. Voice only.
+- Do not change quoted material — client quotes and testimonials stay exactly as given.
+- Where the guide conflicts with clarity, clarity wins for factual text, and you note the conflict.
+- If the original content was already on-voice, say so and make only the minimum changes needed.
+- Don't use a banned word's near-synonym just to avoid the banned word. Replace the meaning, not the word.
+- Every rewrite must preserve the objective and the CTA.
+
+HOW TO USE:
+This is the fix-it pass for any client deliverable in a new voice, or when a guide has changed. Review section 7 before sending — it tells the client which bits you deliberately left alone and pre-empts the "you changed my sentence" objection.
+```
+
+### 65 — Tone Adaptation Across Channels
+
+```text
+ROLE:
+You are a social media writer adapting one core message into a consistent brand voice across six channels — recognisably the same brand, natively written for each platform.
+
+INPUTS:
+- Core message: {{core_message}}
+- Channels: {{channels}}
+- Brand voice guide: {{brand_voice_guide}}
+- Core traits that must not change: {{core_traits}}
+- What may flex by channel: {{flexible_elements}}
+- Audience per channel: {{channel_audiences}}
+- CTA per channel: {{channel_ctas}}
+- Proof points: {{proof_points}}
+
+OUTPUT FORMAT — produce:
+
+1. TONE MAP TABLE — Columns: Channel | Core trait (unchanged) | Register shift | Length | Opening device | CTA style | What to cut. One row per channel in {{channels}}, minimum 6 rows.
+2. THE SAME MESSAGE, SIX WAYS — for each channel: the full copy, final and ready to paste, with character count; plus a one-line note on what changed and why.
+3. VOICE CONSISTENCY CHECK — table: Trait | Present in all channels? | Where it flexed | Acceptable? | Fix. One row per core trait.
+4. PLATFORM ADAPTATION NOTES — table: Platform | Rule that shaped the adaptation | Constraint (character count, format, algorithm reality) | Applied. 8 rows.
+5. CROSS-CHANNEL SEQUENCE — table: Order | Channel | Message angle | Why this order | CTA. For a campaign launch.
+6. OFF-BRAND WARNING — table: Risk | Channel | What it looks like | How to catch it in review. 6 rows.
+
+RULES:
+- The core message and the core traits stay identical across channels. What changes is register, length, opening device, and CTA style.
+- No channel copy may be copied from another with a hashtag swap.
+- Respect real platform constraints: character limits, caption lengths, link placement, and the reality that a link in the post body suppresses reach on several platforms.
+- Apply {{brand_voice_guide}} to every version, and flag any channel where the guide's formality is wrong for the platform.
+- Include a proof point in every version.
+
+HOW TO USE:
+Use this for a campaign launch where the client wants a consistent voice across channels. The tone map is worth sending to the client first — it makes the adaptation decisions explicit, and clients rarely object to a change they've already seen.
+```
+
+### 66 — Banned Words, Cliches, and AI-Writing Cleanup
+
+```text
+ROLE:
+You are a copy editor removing clichés, filler, banned vocabulary, and tell-tale AI writing patterns from client copy, so the words read as though a person wrote them.
+
+INPUTS:
+- Content: {{content}}
+- Brand voice guide: {{brand_voice_guide}}
+- Banned words and phrases: {{banned_words}}
+- Clichés and overused industry phrases: {{cliches}}
+- Words the client uses deliberately: {{protected_terms}}
+- Industry and audience: {{industry}}, {{audience}}
+
+OUTPUT FORMAT — produce:
+
+1. PHRASE SWEEP TABLE — Columns: Phrase found | Occurrences | Location | Why it's weak | Replacement. 20 rows. Covers clichés, filler, vague claims, hedge stacks, and AI tells.
+2. AI-WRITING PATTERN CHECK — table: Pattern | Found? | Where | Why it reads as machine-written | Fix. 10 rows: "it's not just X, it's Y", "in today's fast-paced world", "delve", "unlock", "elevate", tricolon everywhere, perfect parallelism, "when it comes to", rule-of-three overuse, and symmetrical sentence lengths.
+3. HEDGE AND FILLER REMOVAL — table: Original | Cleaned | The meaning lost (if any). 12 rows.
+4. VAGUE QUANTIFIER CHECK — table: Phrase | Problem | Specific version | Note. 10 rows.
+5. REPETITION CHECK — table: Word or phrase | Occurrences | Intent | Fix. 8 rows.
+6. BEFORE / AFTER READ (150 words): the same paragraph before and after, so the client can feel the difference.
+7. FINAL CLEAN COPY: the full content, cleaned, in full.
+8. RESIDUAL NOTES (4 bullets): anything left deliberately, with the reason.
+
+RULES:
+- Remove clichés, but keep phrases that are genuinely part of the industry's language and the audience's vocabulary.
+- Never remove a protected term, even if it appears in the cliché list.
+- Removing a word must never remove meaning. Section 3 exists to catch that.
+- Do not add flourishes in place of clichés. Plain, specific sentences beat clever rewrites.
+- If a banned phrase appears in a legal disclaimer, quoted text, or a client testimonial, leave it and note it.
+- Match {{brand_voice_guide}} in the replacements.
+
+HOW TO USE:
+Run this on every externally-facing document before the QA checklist. Section 2 is the one worth doing every time — the "it's not just X, it's Y" construction is the single most reliable signal that copy came from a model, and clients spot it instantly.
+```
+
+### 67 — Voice Guide for a New Client From a Discovery Call
+
+```text
+ROLE:
+You are a brand strategist drafting a voice guide for a client who has never had one, using their own words from the discovery call.
+
+INPUTS:
+- Client: {{client_name}}
+- Discovery call transcript: {{transcript}}
+- Client's own written materials (emails, website, decks): {{client_writing}}
+- How they describe their own brand: {{self_description}}
+- Words and phrases they used repeatedly: {{recurring_phrases}}
+- Words they reacted negatively to: {{negative_reactions}}
+- Industry and audience: {{industry}}, {{audience}}
+
+OUTPUT FORMAT — produce:
+
+1. VOICE IN ONE LINE (max 20 words), derived from how the client speaks.
+2. TRAITS TABLE — Columns: Trait | Evidence from the transcript | Sounds like | Doesn't sound like | Example to write. 5 rows, each trait evidenced by an actual quote or observation from {{transcript}}.
+3. THE CLIENT'S OWN PHRASES TABLE — Phrase | Where they used it | How to use it in copy | Note. 10 rows. This is the section clients recognise instantly.
+4. MECHANICS TABLE — Columns: Element | Rule | Based on. 8 rows.
+5. WE USE / WE DON'T USE — table: We use | We don't use | Why. 15 rows, built from {{negative_reactions}} and {{recurring_phrases}}.
+6. CHANNEL REGISTER TABLE — Channels: Website, Email, Social, Ads, Proposals. Columns: Channel | Register | What changes. 5 rows.
+7. 10-WORD SAMPLE TEST (table): Sample sentence | Written in the new voice | Verdict. 5 rows, so the client can judge the guide by reading it.
+8. THE ASK TO THE CLIENT (5 bullets): decisions needed to finalise the guide.
+
+RULES:
+- Base the guide on how the client talks, not on what they say the brand is. Their spoken language is the most reliable evidence.
+- Include actual phrases they used. This is what makes the guide feel like theirs rather than generic.
+- If {{client_writing}} contradicts the transcript, note it and ask which is authoritative.
+- Do not introduce vocabulary the client never uses.
+- The sample test must be readable aloud without it sounding stilted.
+
+HOW TO USE:
+Send the client's own phrases table first — it's the section that gets a "yes, that's us" reaction and unlocks approval of the rest. Then send the whole guide with the five asks in section 8 answered.
+```
+
+### 68 — Brand Voice Quick Reference Card
+
+```text
+ROLE:
+You are a brand designer producing a one-page quick reference that a designer, writer, or social media manager can use while working — the fast version of the voice guide.
+
+INPUTS:
+- Full brand voice guide: {{voice_guide}}
+- Brand assets and colours: {{brand_assets}}
+- Approved claims: {{approved_claims}}
+- Banned words: {{banned_words}}
+- Common use cases: {{use_cases}}
+- Brand voice guide as the source of truth: {{brand_voice_guide}}
+
+OUTPUT FORMAT — produce:
+
+1. VOICE CARD (single page):
+   - VOICE IN ONE LINE (one sentence)
+   - 5 TRAITS (one word each + one line of definition)
+   - 5 "ALWAYS" RULES (bullet list, imperative)
+   - 5 "NEVER" RULES (bullet list, imperative)
+   - 10 APPROVED PHRASES (ready to drop into copy)
+   - 10 BANNED PHRASES (each with a one-word replacement)
+   - DO / DON'T table: Element | Do | Don't — 8 rows covering hooks, headlines, CTAs, openings, social posts, email subject lines, and long-form intros
+   - SPECIMEN: 3 short paragraphs written in the voice (website, email, social)
+2. QUICK USE TABLE — Columns: Use case | Voice in one line | Do | Don't | Example. 8 rows.
+3. TYPE SETTER'S NOTE — table: Element | Guidance. 5 rows for designers.
+4. THE ONE-PAGE FORMAT SPEC — table: Element | Specification. 8 rows: dimensions, layout, type sizes, colours, spacing, print and screen versions, and where to store it.
+5. WHERE THIS LIVES (2 bullets): file location and the rule for updating it when the full guide changes.
+
+RULES:
+- Everything on the card must be usable without opening the full guide. If a rule needs the full guide to understand, it doesn't belong on the card.
+- The approved phrases must be complete, ready-to-use sentences or fragments, not category labels.
+- The specimen paragraphs must be published-quality, not placeholders.
+- Keep the card to one page. If it runs long, the reference content has bloated.
+- The card must agree with the full guide on every point. If they differ, the full guide wins and the card is wrong.
+
+HOW TO USE:
+Put this in the client's Notion workspace as the first page, and pin it in the creative team's channel. Most voice violations happen because nobody opened the 12-page guide — this is the version people actually read.
+```
+
+---
+
+
+## Prompt to artifact: a full worked example
+
+This section runs one real deliverable end to end so you can see exactly how the prompts chain together and what the finished artefact looks like. Nothing here is theoretical: the same flow works for a client report, a proposal, a campaign launch, or a website launch.
+
+**The client:** Fieldnote Coffee Co. — a direct-to-consumer coffee subscription, 8,200 active subscribers, 14 SKUs, competing against a dozen subscription coffee brands. They spend on Meta, Google Search, TikTok, and email. Their agency retainer covers paid social management, email, creative, and monthly reporting.
+
+**The moment:** it's 2 June. The May report is due Friday 6 June. The client has sent their GA4 and ad account exports and asked whether the increase in Meta spend was worth it.
+
+### The prompt chain
+
+| Step | Prompt | What it produces | How long it takes |
+|---|---|---|---|
+| 1 | **44 — Analytics Data QA and Validation** | The clean dataset, with every discrepancy logged before anyone writes a conclusion | 15 min |
+| 2 | **40 — Campaign Performance Deep-Dive** | The diagnosis: what actually happened in Meta, and why | 20 min |
+| 3 | **38 — Monthly Performance Report** | The finished client report, all ten sections | 30 min |
+| 4 | **61 — Brand Voice Enforcement Pass** | The report's narrative brought into the client's voice | 15 min |
+| 5 | **57 — Pre-Send Client Deliverable QA** | The sign-off, the issues found, the fixes applied | 15 min |
+
+Total: roughly 95 minutes of senior attention, versus the four to six hours it usually takes to pull the numbers, find the story, and write it up.
+
+---
+
+### Step 1 — Prompt 44: validating the data first
+
+Before writing anything, the data gets checked. This step is the one most agencies skip, and it is the one that stops a wrong number reaching a client.
+
+**What came in**
+
+| Source | Rows | Period | Notes |
+|---|---|---|---|
+| Meta Ads Manager | 38 campaigns | 1–31 May | Exported with spend, impressions, clicks, purchases |
+| Google Ads | 12 campaigns | 1–31 May | Last-click revenue only, no data for 12–13 May (billing outage) |
+| GA4 | 1–28 May | 1–31 May | 3 days missing at export |
+| Shopify | 4,182 orders | 1–31 May | Source of truth for revenue and refunds |
+| Klaviyo | 3 email sends | May | Open and click rates, attributed revenue |
+| Client spreadsheet | Manual | May | A "best performing post" sheet the client maintains by hand |
+
+**What the validation found**
+
+| ID | Dataset | Issue | Severity | Resolution |
+|---|---|---|---|---|
+| 1 | Google Ads | No data for 12–13 May (billing outage) | Critical | Compare against 12–13 April, and state the gap in the report |
+| 2 | GA4 vs Shopify | 3 days missing from GA4 | Major | Use Shopify for revenue; GA4 for sessions on available days only |
+| 3 | Meta revenue | Meta attributed £41,200; Shopify recorded £29,600 | Major | Use Shopify revenue throughout; explain the difference once |
+| 4 | Client spreadsheet | "Best post" list contains 2 posts that ran in April, not May | Minor | Excluded; noted in the report's production log |
+| 5 | GA4 sessions | Duplicate session rows on 3 days | Minor | Deduplicated; 3.1% of monthly sessions affected |
+
+**Output — the corrected scorecard**
+
+| KPI | Target | Actual | vs target | vs April | Trend | Status |
+|---|---|---|---|---|---|---|
+| New subscribers | 900 | 1,046 | +16% | +11% | ▲ | On track |
+| Blended CAC | £28 | £26.40 | −6% | −9% | ▲ | On track |
+| Revenue | £420,000 | £447,300 | +6% | +14% | ▲ | On track |
+| Meta contribution margin | £180,000 | £152,600 | −15% | −18% | ▼ | At risk |
+| Email revenue share | 22% | 19.4% | −3% | −4% | ▼ | At risk |
+| Repeat purchase rate | 31% | 34.8% | +12% | +3% | ▲ | On track |
+
+The headline: growth is genuinely good, and Meta is where the problem lives. That conclusion was visible only after validation — the raw Meta export showed Meta revenue up 24%, which would have produced a completely wrong report.
+
+---
+
+### Step 2 — Prompt 40: the deep dive that finds the story
+
+**The funnel**
+
+| Funnel stage | Volume | Rate from previous | Benchmark | Gap | Diagnosis |
+|---|---|---|---|---|---|
+| Impressions | 2,914,000 | — | — | — | — |
+| Clicks | 61,340 | 2.10% | 2.30% | −0.2pp | Creative fatigue — CTR fell from 2.6% in April |
+| Landing page views | 57,900 | 94.4% | 95% | −0.6pp | Within tolerance |
+| Add to cart | 3,180 | 5.49% | 6.5% | −1.0pp | Mobile checkout friction on the subscription page |
+| Purchases | 1,046 | 32.9% | 30% | +2.9pp | Strong — offer and pricing are working |
+
+**Creative performance**
+
+| Asset ID | Hook | Format | Spend | CTR | CVR | CPA | Frequency | Status |
+|---|---|---|---|---|---|---|---|---|
+| A04 | "Your coffee, but better" | Static | £4,120 | 1.8% | 2.1% | £39.40 | 4.8 | Kill |
+| A07 | "We tasted 41 roasts so you don't have to" | Video | £9,860 | 3.4% | 4.9% | £18.20 | 2.1 | Scale |
+| A11 | "£8.50 a cup. Half the price of the café." | Static | £7,240 | 2.9% | 3.8% | £21.10 | 5.2 | Iterate |
+| A12 | "The subscription that paused when you went on holiday" | Carousel | £6,980 | 3.1% | 4.2% | £19.60 | 3.0 | Scale |
+| A15 | "Coffee people in your area drink" | UGC | £8,110 | 2.2% | 2.6% | £31.70 | 6.1 | Kill |
+| A18 | "One bag, 14 origins, one subscription" | Video | £10,240 | 3.6% | 5.2% | £17.90 | 1.8 | Scale |
+
+The story: two of the three worst performers are the highest-frequency ads. Frequency on A15 hit 6.1, meaning the same 22,000 people saw it repeatedly until they stopped clicking. Meanwhile the three best performers are all low-frequency and all share one property — they show the *product doing something*, not the product being admired.
+
+**What worked and why**
+
+The three scaling assets all begin with a specific number — 41 roasts, 14 origins, £8.50 — and all show the physical product in the first two seconds. Specificity plus demonstration beat lifestyle imagery, and the frequency data shows the audience was still fresh when it ran. A04 and A15 led with a mood ("Your coffee, but better") and a generalisation ("Coffee people in your area drink"), neither of which earned the second second of attention.
+
+**What didn't work and why**
+
+A15 was the client's favourite creative going into May — it tested well in a small test at £500. At £8,110 it went to 6.1 frequency and the CTR collapsed. The test was sound; the scaling decision ignored frequency. That distinction matters, because the client needs to hear that the concept was fine and the pacing was wrong.
+
+**Recommendations that came out of the deep dive**
+
+| # | Recommendation | Expected effect | Effort | Risk | Owner |
+|---|---|---|---|---|---|
+| 1 | Pause A04 and A15, redirect to A07/A12/A18 | +£6,200 contribution margin | 1 hour | Loss of reach if a hidden winner | Paid lead |
+| 2 | Cap frequency at 4.0 across Meta prospecting | Lower waste, higher CTR | 2 hours | Slight reach reduction | Paid lead |
+| 3 | Move A11 to a new audience and drop the price from the hook | +0.4pp CTR | 30 min | Price-led hook may underperform | Creative |
+| 4 | Fix mobile checkout friction (3 identified fixes) | +0.6pp conversion | 1 sprint | Dev capacity | Client dev |
+| 5 | Increase email revenue share with a win-back flow | +2.5pp share | 1 week | Subscriber fatigue | CRM lead |
+| 6 | Produce three product-demonstration videos for June | 3 scaling-ready assets | 5 days | Production cost | Creative |
+
+---
+
+### Step 3 — Prompt 38: the finished client report
+
+The report that follows is the actual artefact — the ten sections, in order, as the client receives it. Section 2 is shown in full because it is the section that gets forwarded to the client's board.
+
+---
+
+**FIELDNOTE COFFEE CO. — MAY 2026 PERFORMANCE REPORT**
+
+Prepared by {{your_agency}} · Issued 6 June 2026 · Data sources: Shopify, Meta Ads Manager, Google Ads, GA4, Klaviyo · Reporting cadence: monthly, by the 5th working day
+
+---
+
+#### 1. Executive summary
+
+May was our strongest month on record for subscriber growth. We added 1,046 new subscribers against a target of 900, which is 16% above target and 11% ahead of April, while acquisition cost fell from £28 to £26.40. Total revenue was £447,300, 6% above target.
+
+The problem this month was Meta. We spent £19,840 more than April, but the extra spend produced £9,100 less contribution margin, because two of our six campaigns were running to the same people too many times. This was a pacing problem, not a creative or strategy problem, and it is reversible — we have already paused the two campaigns and redirected that budget into the three that were working. If the same pattern does not repeat in June, Meta returns to being our most profitable channel.
+
+On the other side of the account, email is under-performing its share of revenue at 19.4% against a 22% target, even though repeat purchase rate rose to 34.8%. We have a win-back flow to launch in June, which is the cheapest revenue available to us.
+
+#### 2. KPI scorecard
+
+| KPI | Target | Actual | vs target | vs April | Trend | Status |
+|---|---|---|---|---|---|---|
+| New subscribers | 900 | 1,046 | +16% | +11% | ▲ | On track |
+| Blended CAC | £28 | £26.40 | −6% | −9% | ▲ | On track |
+| Revenue | £420,000 | £447,300 | +6% | +14% | ▲ | On track |
+| Meta contribution margin | £180,000 | £152,600 | −15% | −18% | ▼ | At risk |
+| Email revenue share | 22% | 19.4% | −3% | −4% | ▼ | At risk |
+| Repeat purchase rate | 31% | 34.8% | +12% | +3% | ▲ | On track |
+| Landing page conversion rate | 6.0% | 5.4% | −0.6pp | −0.3pp | ▼ | At risk |
+
+#### 3. Channel performance
+
+| Channel | Spend | Impressions | Reach | Clicks | CTR | Conversions | CPA | ROAS | Rating |
+|---|---|---|---|---|---|---|---|---|---|
+| Meta | £27,600 | 2,914,000 | 1,142,000 | 61,340 | 2.10% | 697 | £39.60 | 2.4× | C |
+| Google Search | £14,200 | 186,000 | 141,000 | 24,800 | 13.33% | 268 | £52.99 | 4.1× | A |
+| TikTok | £3,100 | 214,000 | 168,000 | 7,900 | 3.69% | 41 | £75.61 | 1.6× | D |
+| Email | £0 | 412,000 delivered | 68% open | 9,340 | 2.27% | 203 | £0 | 12.8× | A |
+| Organic / SEO | £0 | 84,000 | — | — | — | 34 | £0 | 5.6× | B |
+| **Total** | **£44,900** | | | | | **1,243** | **£36.12** | **3.9×** | |
+
+#### 4. Top performing assets
+
+| Asset | Channel | Spend | Conversions | CPA | Why it worked |
+|---|---|---|---|---|---|
+| A18 "One bag, 14 origins, one subscription" | Meta | £10,240 | 572 | £17.90 | Opens with a specific number and shows all 14 origins in the first two seconds — no setup, no scrolling past a logo |
+| A07 "We tasted 41 roasts so you don't have to" | Meta | £9,860 | 542 | £18.20 | Turns a quality claim into a concrete, verifiable act, then shows the tasting bench |
+| A12 "The subscription that paused when you went on holiday" | Meta | £6,980 | 356 | £19.60 | Names an objection nobody else in the category mentions, and answers it visually in three frames |
+
+All three are low-frequency (1.8–3.0) and all three show the product doing something rather than being styled. That is the pattern to repeat in June.
+
+#### 5. Underperformers and losses
+
+| Asset or campaign | Spend | Result | Likely cause | Decision | Owner |
+|---|---|---|---|---|---|
+| A15 "Coffee people in your area drink" | £8,110 | 256 conversions, CPA £31.70, CTR collapsed to 2.2% | Frequency reached 6.1 — the same audience saw it repeatedly. The creative tested well at £500; it was not ready for £8,000 of spend | **Kill** (concept returns in July with a new audience) | Paid lead |
+| A04 "Your coffee, but better" | £4,120 | 105 conversions, CPA £39.40 | Mood-led hook with no specific claim; 1.8% CTR against a 2.3% benchmark | **Kill** | Paid lead |
+| TikTok account | £3,100 | 41 conversions, CPA £75.61 | 9 posts, no native-format video, no creator content, no hook pattern | **Pause** and rebuild from zero in July rather than continue | Paid lead |
+
+Total spend released: £15,330. Two of the three losses trace to the same decision — scaling before checking frequency.
+
+#### 6. Creative production log
+
+| Date | Asset | Channel | Status | Performance |
+|---|---|---|---|---|
+| 2 May | A19 "The 30-second ritual" | Meta | Live | 141 conversions, £24.10 CPA |
+| 6 May | A20 "Beans, not blends" | Meta | Live | 88 conversions, £31.40 CPA |
+| 9 May | A21 "Pause anytime" carousel | Instagram | Live | 4,100 saves, 1.2% engagement rate |
+| 13 May | A22 "Grind size matters" | Meta | Live | 96 conversions, £29.80 CPA |
+| 18 May | A23 "Your first delivery" | Email | Sent | 41.2% open, 3.1% click |
+| 22 May | A24 "Roast day" | TikTok | Live | 9,800 views, 0.4% engagement |
+| 28 May | A25 "Subscribe and save 10%" | Meta | Live | 73 conversions, £26.60 CPA |
+
+#### 7. Insights
+
+1. **Specificity beat lifestyle on every platform.** All three scaling assets lead with a number (41, 14, £8.50) and show the product in motion. The two killed assets led with a mood and a generalisation, and both fell below the CTR benchmark.
+2. **Frequency, not fatigue-by-audience, was the binding constraint.** A15's CTR fell 46% from week one to week four while its frequency rose from 2.4 to 6.1. No creative was on for more than three weeks in May.
+3. **The May billing outage cost us roughly two days of Google comparison.** Revenue for 12–13 May is excluded from the Google Ads comparison and the gap is stated wherever those figures appear.
+4. **Repeat purchase rate rose 3 points while email's revenue share fell 4 points.** Our existing subscribers are buying more, but we are not re-engaging the ones who lapse. The two numbers point at the same gap.
+5. **Meta's reported revenue (£41,200) exceeded Shopify's recorded revenue (£29,600) by 39%.** This is Meta's standard attribution over-counting on view-through. All figures in this report use Shopify revenue.
+
+#### 8. Next month's plan
+
+| Action | Channel | Owner | Start date | Target metric |
+|---|---|---|---|---|
+| Launch win-back flow for 90-day lapsed subscribers | Email | CRM lead | 8 Jun | Email revenue share ≥ 21% |
+| Shift £12,000 from A04/A15 to A07/A12/A18 | Meta | Paid lead | 3 Jun | Meta CPA ≤ £28 |
+| Set frequency cap at 4.0 on all prospecting | Meta | Paid lead | 3 Jun | Meta CTR ≥ 2.4% |
+| Produce three demonstration-led videos | Creative | Creative lead | 8 Jun | 3 assets live by 19 Jun |
+| Ship three mobile checkout fixes | Client site | Client dev | 10 Jun | LP conversion ≥ 6.0% |
+| Rebuild TikTok from a standing start | TikTok | Social lead | 22 Jun | 10 native videos, CPA benchmark set |
+| Test a price-led hook on A11 with a fresh audience | Meta | Paid lead | 15 Jun | CTR +0.4pp on A11 |
+
+#### 9. Action required from Fieldnote
+
+| # | Action | Why it matters | Owner | Needed by | Impact if delayed |
+|---|---|---|---|---|---|
+| 1 | Approve the mobile checkout fixes for the sprint | Conversion rate is 0.6pp below target and the friction is on mobile, where 71% of traffic sits | Priya, CTO | 9 Jun | June revenue target at risk by ~£18,000 |
+| 2 | Confirm the win-back offer (15% off first box) | The flow cannot be built without the approved discount and margin ceiling | Tom, MD | 5 Jun | Email revenue share stays at 19% |
+| 3 | Confirm pause of TikTok through 30 June | £3,100 of current spend returns to Meta; the channel restarts in July from zero | Tom, MD | 2 Jun | £3,100 continues to spend at £75.61 CPA |
+| 4 | Share the new roast photography set | Three June videos depend on it; without it, the June creative pipeline slips a week | Sam, Brand | 6 Jun | 3 assets delayed, £4,000 of creative budget reallocated |
+
+---
+
+### Step 4 — Prompt 61: bringing the report into the brand voice
+
+The draft above is accurate but reads like an internal document. Fieldnote's voice guide says: *plainly expert, calmly direct, never hyped, short sentences, no jargon, no exclamation marks, numbers before adjectives.* Applying the enforcement pass changes the executive summary and the narrative sections.
+
+| ID | Location | Draft | After voice pass | Rule applied |
+|---|---|---|---|---|
+| 1 | Exec summary, sentence 1 | "May was our strongest month on record for subscriber growth." | "May was our best month yet for subscriber growth." | Shorter sentence, no superlative stacking |
+| 2 | Exec summary | "which is 16% above target and 11% ahead of April" | "That is 16% above target and 11% ahead of April." | Contraction matches the guide |
+| 3 | Exec summary | "The problem this month was Meta." | "Meta is where this month went wrong." | Calmer, plainer construction |
+| 4 | Exec summary | "because two of our six campaigns were running to the same people too many times" | "Two of our six campaigns kept reaching the same people too often." | Removes jargon ("frequency" appears later, explained) |
+| 5 | Insight 2 | "A15's CTR fell 46% from week one to week four while its frequency rose from 2.4 to 6.1." | "A15's CTR fell 46% across May. Its frequency went from 2.4 to 6.1." | One idea per sentence |
+| 6 | Insight 5 | "This is Meta's standard attribution over-counting on view-through." | "Meta counts some sales it did not directly cause. That is how Meta reports." | Plain English, no jargon |
+| 7 | Action 1 | "Conversion rate is 0.6pp below target and the friction is on mobile, where 71% of traffic sits" | "We convert 0.6pp below target. The friction is on mobile, and 71% of traffic is mobile." | Short sentences |
+| 8 | Top assets | "Turns a quality claim into a concrete, verifiable act" | "It turns a quality claim into something you can check." | No abstract nouns |
+
+The voice pass changed roughly 60 words across a 2,400-word report. That is the point of running it as a separate step: the structure and the numbers are already right, so the voice pass is a light, fast edit rather than a rewrite.
+
+---
+
+### Step 5 — Prompt 57: the QA that catches the last three problems
+
+| ID | Severity | Category | Location | Issue | Fix applied |
+|---|---|---|---|---|---|
+| 1 | Critical | Fact check | Section 3, Email row CTR | The email CTR was calculated against delivered emails rather than opened emails — the number was inflated | Recalculated against delivered; changed from 2.27% to 1.83% |
+| 2 | Critical | Placeholder | Section 1 header | `{{your_agency}}` had been left in the document | Replaced with the agency name and version stamp added |
+| 3 | Major | Consistency | Section 4 vs Section 5 | A19 appears in the production log with 141 conversions but is missing from the top-performing assets table | Added as fourth top performer and the table re-sorted |
+| 4 | Major | Fact check | Section 3, Total row | Total conversions (1,243) includes email and organic, but the section title implies paid only | Row label changed to "Total (all channels)" and a note added |
+| 5 | Minor | Formatting | Section 2 | Trend arrows pointed up on CAC because a fall is good | Reversed to ▼ and added a note that down is good for CAC |
+| 6 | Minor | Voice | Section 8 | "rebuilt from a standing start" — reads as a phrase, not a statement | Rewritten to "rebuild TikTok from zero" |
+| 7 | Minor | Date check | Section 6 | A21 posted 9 May but the log listed it as Instagram only; it also ran as a Meta ad | Both placements listed |
+
+Final verdict: **PASS WITH MINOR EDITS** after fixes. The report went out on 6 June at 09:14, with the executive summary pasted into the email body so the client's MD could read it without opening the document.
+
+### What the client replied
+
+> "This is the first report I've received where I know what to do on Monday. The frequency thing on A15 is fair — I'd have scaled it if I hadn't seen the numbers next to each other. Approved on all four actions except TikTok: I'd rather we keep it live at £1,500 until the end of June so we have something to look at when we restart."
+
+That reply is the point of the whole pack. The report didn't just describe May — it made the client's next four decisions for them, in their voice, with every number traceable, and it flagged the one thing that was genuinely their call.
+
+---
+
+## Client-ready checklist
+
+Run this before anything leaves your outbox. Every item has a pass condition — if you can't confirm it, don't send.
+
+### The 20-point pre-send check
+
+| # | Check | Pass condition |
+|---|---|---|
+| 1 | All placeholders resolved | No `{{...}}`, no `[NEEDS INPUT]`, no "TBC", no lorem ipsum anywhere in the document |
+| 2 | Numbers traceable | Every figure traces to a source in the data, with its date; no number was estimated without saying so |
+| 3 | Period stated | The reporting period appears in the header with exact start and end dates |
+| 4 | Comparison present | Every metric has a target, a prior period, or both |
+| 5 | Claims verified | Every claim about results, product, or market appears in the approved claims list, or is flagged for sign-off |
+| 6 | Brand voice applied | The document reads in the client's voice — check the banned words list, not just the general tone |
+| 7 | No banned words | Zero occurrences of the client's banned vocabulary and clichés, including inside compounds |
+| 8 | Reading level appropriate | Reads at the level of the most senior person who will read it; jargon is either explained or removed |
+| 9 | Structure matches the template | Every section the brief promised is present, in the agreed order, with the agreed row counts |
+| 10 | Row counts exact | Calendars have the exact number of rows; tables have no missing or extra rows; matrix cells are all filled |
+| 11 | No empty cells | Every table cell has content, or an explicit em dash with a stated reason |
+| 12 | Links tested | Every link opens, points where the text says it does, and carries the correct UTM parameters |
+| 13 | Assets attached | Every referenced image, file, or deck is actually attached and opens correctly |
+| 14 | Alt text present | Every image has alt text describing its purpose in context |
+| 15 | Accessibility checked | Captions on video, contrast checked, heading hierarchy correct, link text meaningful |
+| 16 | Platform rules met | Character limits, hashtag rules, aspect ratios, and disclosure requirements satisfied |
+| 17 | Names and spelling correct | Client name, product names, contact names, and brand capitalisation checked against the account record |
+| 18 | Dates consistent | No contradictory dates between the cover, the body, and the log; year included where the month alone is ambiguous |
+| 19 | Internal content removed | No internal notes, margin figures, internal links, competitor names, or commentary about the client |
+| 20 | The ask is clear | The document ends with what happens next: who decides what, and by when |
+
+### Per-artefact additions
+
+| Artefact | Also check |
+|---|---|
+| Content calendar | Every hook is a finished sentence; no two rows share a hook; the final row is a CTA; asset owners are named |
+| Audit report | Every finding has an owner and an effort estimate; severity definitions are stated; evidence is quoted, not paraphrased |
+| Ad copy matrix | Character counts are shown and within limits; every ad matches the landing page promise; a decision threshold is set for every test |
+| Monthly report | Executive summary reads well when forwarded on its own; underperformers have a decision; action table has deadlines and owners |
+| QBR deck | Every slide title is a sentence with a number in it; failures and money lost are included; decisions have recommendations |
+| Proposal | Their problem is described before our capability; the timeline respects their real constraints; commercials have a clear next step |
+| Scope of work | Every deliverable has a quantity and a frequency; exclusions are explicit; change control is defined |
+| Website copy | Metadata is within limits; the H1 states an outcome; the copy doesn't rely on the visual to carry meaning |
+| Email newsletter | Subject line is specific; link text is descriptive; plain-text version included; unsubscribe present; mobile preview checked |
+| Brand voice guide | Every trait has a before/after example; the "we don't use" column gives a reason; mechanics have numeric targets |
+
+### The three-question sanity check
+
+Before you press send, ask yourself:
+
+1. **If the client's most sceptical colleague read only the summary and the recommendation, would they have everything they need to agree?** If not, the summary is missing the reasoning that matters.
+2. **Is there anything in this document I would not want quoted in a future case study?** Anything about margin, internal capacity, a difficult client relationship, or a competitor's problem. Remove or rewrite it.
+3. **Does this document make my next job easier?** Every artefact should leave the client clearer than they were before, and should make the next request, approval, or deadline obvious.
+
+---
+
+
+## FAQ
+
+**Will these prompts work if I don't have a brand voice guide yet?**
+Yes. About half the prompts accept `{{brand_voice_guide}}` and will work without one — they simply won't enforce a voice. If the client has no guide, run Prompt 63 (Build a Brand Voice Guide From Existing Content) or Prompt 67 (Voice Guide From a Discovery Call) first; both produce a guide from material you already have. Clients who have never had a voice guide are the most common case, and it's also where the pack adds the most value, because the guide becomes a deliverable you bill for.
+
+**Do I need a paid AI tool to use this?**
+No. Every prompt works in any modern chat assistant. The prompts are written for paste-and-run use and don't depend on tool access, file uploads, or integrations. If your tool truncates long tables, ask for the output section by section — "Give me rows 1–15 only" — and stitch them into the client template.
+
+**How do I keep the AI from inventing statistics or client quotes?**
+Every prompt includes a placeholder-based rule: anything not supplied comes back as `[NEEDS INPUT: ...]` rather than a plausible guess. The QA prompts (57, 59, 61) then check for leftover placeholders and unverified claims before anything is sent. The discipline is simple — never paste a statistic into a prompt without also pasting its source, and never accept a specific number that came back from the model without checking it against the raw export.
+
+**What if my client changes their requirements mid-project?**
+That's a scope conversation, not a prompt problem. Prompt 46 (Scope of Work) defines what each deliverable includes, in what quantity, at what frequency, and what's excluded — which is what makes the conversation about the change rather than about who made a mistake. Run Prompt 50 (Renewal and Scope Expansion) when the change is large enough to warrant a different tier.
+
+**Is this going to make my output sound like AI?**
+It won't, if you run the QA prompts. The structure of this pack pushes away from the two things that read as machine-written: generic abstraction and clichéd phrasing. Prompt 66 removes the specific tells — "it's not just X, it's Y", "in today's fast-paced world", tricolon everywhere — and Prompt 61 enforces the client's actual voice. What you send should read like a competent person wrote it, because the rules that produce that are built into every prompt.
+
+**Can I use these for my own agency's marketing?**
+Yes. Everything here is written to be adapted to any client, including yours. The prompts reference `{{your_agency}}` in a few places (report footers, proposal covers, sign-offs) — swap it for your name. If you build a report on your own agency's performance, the monthly report prompt and the QBR outline will do the same work they do for a client.
+
+**How long does a full deliverable actually take?**
+The worked example in this pack — a monthly client report including data validation, deep-dive analysis, the full report, a voice pass, and QA — took about 95 minutes of senior attention against the four to six hours it usually takes. Reports, audits, and content calendars are the fastest wins. Strategy and creative work take longer because the thinking is the work; the prompts save you the formatting and the blank-page time, not the judgement.
+
+**What format do I get, and how do I use it in Notion?**
+The pack ships as a PDF plus a Notion workspace. The PDF is the readable reference — the templates and prompts, laid out for printing and searching. The Notion workspace has each prompt in its own database row with the copy button, the artefact templates as ready-to-duplicate pages, and a `Deliverables` tracker for running client work. The intended workflow is to duplicate the artefact template page into the client's folder, run the matching prompt, paste the output into the template's structure, and run the checklist before sending.
+
+---
+
+## Free lifetime updates — every future version is yours
+
+This pack will keep growing. New prompts will be added as agencies find what works on real client work: more channel-specific reporting structures, additional audit formats, agency-specific operational templates, and prompts that get sharper as we watch which structures produce artefacts clients actually approve. The artefact template library will expand alongside them.
+
+**Every future version is included at no additional cost.** Buy this pack once and you receive every update that follows — there is no upgrade fee, no subscription, no tier to move up to, and no expiry on your access.
+
+The updates land in the same place your original download lives. You'll get an email when a new version is published, with a short summary of what was added and what changed. Existing prompts don't get silently rewritten — if a prompt is improved, the version history is included so you can see exactly what moved and why. And nothing you already have gets taken away: your copy of every template and prompt stays yours.
+
+**What you get on every update**
+
+| Update type | What it contains |
+|---|---|
+| New prompts | Added to the relevant category, numbered continuously, with the same structure and a "How to use" line |
+| New artefact templates | Added to the template library with the exact sections, columns, row counts, and cell-by-cell guidance |
+| Improved prompts | Revised with a changelog showing what changed and why |
+| New worked examples | Full prompt chains for real deliverable types, as the one in this pack shows |
+| Notion workspace updates | New database views, synced with the PDF additions |
+
+**Two things that will not change:** the price you paid, and the promise that every update is free. If a major version arrives that changes how the pack works, you still get it — and the changelog tells you exactly what moved so nothing in your existing workflow breaks without you knowing.
+
+Thank you for buying. Now go deliver something your client would actually pay for.
+
+---
+
+*Agency Client Delivery AI Prompt Pack — 68 prompts across 10 categories, 20 finished artefact templates, and a full worked example. Format: PDF + Notion. Free lifetime updates.*
